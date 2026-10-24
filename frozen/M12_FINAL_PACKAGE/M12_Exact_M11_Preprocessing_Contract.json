@@ -1,0 +1,77 @@
+{
+  "contract_name": "M12_Exact_M11_Preprocessing_Contract",
+  "contract_version": "1.0",
+  "status": "FROZEN_FOR_M12_INFERENCE",
+  "authoritative_m11_preprocessing": {
+    "artifact": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\PREPROCESSING\\M11_Exact_Training_Preprocessing.npz",
+    "sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb"
+  },
+  "upstream_contracts": {
+    "input_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Prediction_Input_Contract.json",
+    "feature_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Causal_Feature_Construction_Contract.json",
+    "smap_terrain_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_SMAP_Terrain_Integration_Contract.json",
+    "sequence_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Operational_Sequence_Contract.json",
+    "feature_order_owner": "M12_Prediction_Input_Contract.json"
+  },
+  "representation": {
+    "environmental_channels": 15,
+    "missingness_channels": 15,
+    "total_channels": 30,
+    "output_dtype": "float32",
+    "missingness_captured_before_imputation": true,
+    "missingness_channels_scaled": false
+  },
+  "imputation": {
+    "method": "training-only feature-wise median",
+    "operational_refit": false,
+    "live_refit": false,
+    "historical_replay_refit": false,
+    "validation_refit": false,
+    "test_refit": false,
+    "target_based": false
+  },
+  "scaling": {
+    "method": "StandardScaler-equivalent",
+    "training_only": true,
+    "environmental_channels_scaled": true,
+    "missingness_channels_scaled": false,
+    "operational_refit": false,
+    "live_refit": false,
+    "historical_replay_refit": false
+  },
+  "sequence": {
+    "flood_length": 15,
+    "landslide_length": 30,
+    "flood_input_channels": 15,
+    "landslide_input_channels": 15,
+    "flood_output_channels": 30,
+    "landslide_output_channels": 30,
+    "chronological_order": true,
+    "district_isolation": true,
+    "consecutive_daily_history_required": true,
+    "future_observations_prohibited": true,
+    "labels_excluded": true
+  },
+  "causality": {
+    "future_information_prohibited": true,
+    "future_smap_prohibited": true,
+    "smap_max_age_days": 7,
+    "interpolation": false,
+    "blind_forward_fill": false,
+    "target_based_alignment": false
+  },
+  "self_tests": {
+    "upstream_contracts": "PASS",
+    "npz_discovery": "PASS",
+    "npz_hash_recheck": "PASS",
+    "parameter_integrity": "PASS",
+    "flood_clean_input": "PASS",
+    "missingness_preservation": "PASS",
+    "median_imputation": "PASS",
+    "scaler": "PASS",
+    "landslide_30_day": "PASS",
+    "determinism": "PASS",
+    "anti_refit": "PASS"
+  },
+  "m12_rule": "M12 operational, live, and historical replay data must use only the frozen M11 training-derived preprocessing parameters. No preprocessing parameter may be recalculated or refitted."
+}

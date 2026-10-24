@@ -1,0 +1,258 @@
+{
+  "contract_name": "M12_Adversarial_Testing_Contract",
+  "contract_version": "2.0",
+  "status": "PASS",
+  "adversarial_tests": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "valid_controls": {
+    "valid_probability": "ACCEPT",
+    "valid_same_day": "ACCEPT",
+    "valid_causal_smap": "ACCEPT",
+    "valid_flood_shape": "ACCEPT",
+    "valid_landslide_shape": "ACCEPT",
+    "valid_flood_features": "ACCEPT",
+    "valid_landslide_features": "ACCEPT",
+    "valid_probability_boundaries": "ACCEPT",
+    "frozen_identity": "PASS"
+  },
+  "guardrails": {
+    "future_observations": "REJECT",
+    "future_smap": "REJECT",
+    "stale_smap": "REJECT",
+    "negative_rainfall": "REJECT",
+    "missing_dates": "REJECT",
+    "duplicate_dates": "REJECT",
+    "district_crossing": "REJECT",
+    "feature_corruption": "REJECT",
+    "label_injection": "REJECT",
+    "audit_channel_injection": "REJECT",
+    "nan": "REJECT",
+    "inf": "REJECT",
+    "shape_corruption": "REJECT",
+    "invalid_probability": "REJECT",
+    "preprocessing_mutation": "REJECT",
+    "model_mutation": "REJECT"
+  },
+  "immutability": {
+    "flood_model_sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+    "landslide_model_sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+    "preprocessing_sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "flood_source_sha256": "4f87fa768bba3e3cac14deceb52bf9cc0faf3f48efb89087eaed6f73350c76b7",
+    "landslide_source_sha256": "6b29708b1d825abe253f64bf5f8e02863739af4167afac10f4d3c9f8645869ef"
+  },
+  "modification_policy": {
+    "m11_modified": false,
+    "m10_modified": false,
+    "m9_modified": false,
+    "models_modified": false,
+    "preprocessing_modified": false,
+    "source_files_modified": false,
+    "training_performed": false,
+    "tuning_performed": false,
+    "recalibration_performed": false
+  },
+  "results": {
+    "adversarial": [
+      {
+        "test": "Future observation",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Future SMAP",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "SMAP age > 7 days",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Negative rainfall",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Missing sequence date",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Duplicate date",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "District crossing",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Flood feature deletion",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Landslide feature insertion",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Feature-order corruption",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Flood label injection",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Landslide label injection",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "RiverObs audit-channel injection",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Label_Status injection",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "NaN tensor",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Inf tensor",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Wrong flood sequence length",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Wrong landslide sequence length",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Wrong channel count",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Probability > 1",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Probability < 0",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Invalid district",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Invalid hazard",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Negative SMAP age",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Future history",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Preprocessing mutation",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Frozen model mutation",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "River availability flag injection",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Target-column substitution",
+        "status": "PASS",
+        "exception": "ValueError"
+      },
+      {
+        "test": "Unauthorized extra channel",
+        "status": "PASS",
+        "exception": "ValueError"
+      }
+    ],
+    "controls": [
+      {
+        "test": "Valid probability",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid same-day observation",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid causal SMAP lag",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid flood batch shape",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid landslide batch shape",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid flood feature order",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid landslide feature order",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Valid probability boundaries",
+        "status": "PASS",
+        "exception": null
+      },
+      {
+        "test": "Frozen artifact identity",
+        "status": "PASS",
+        "exception": null
+      }
+    ]
+  }
+}

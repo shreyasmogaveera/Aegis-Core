@@ -1,0 +1,68 @@
+{
+  "contract_name": "M12_Live_Prediction_Contract",
+  "contract_version": "1.0",
+  "status": "PASS",
+  "mode": "live",
+  "provider_architecture": {
+    "provider_neutral": true,
+    "provider_adapter_required": true,
+    "credentials_in_model": false,
+    "credentials_in_frontend": false
+  },
+  "source_status": {
+    "official_rainfall_source_registered": true,
+    "official_smap_source_registered": true,
+    "exact_14_station_river_mapping_locked": false,
+    "fabricated_endpoint_used": false,
+    "fabricated_live_observation_used": false
+  },
+  "input_contract": {
+    "flood_feature_count": 15,
+    "landslide_feature_count": 15,
+    "future_observations_allowed": false,
+    "labels_allowed_as_model_input": false,
+    "training_refit_allowed": false
+  },
+  "models": {
+    "flood": {
+      "name": "Flood_T06_FINAL",
+      "sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+      "sequence_length": 15,
+      "channels": 30
+    },
+    "landslide": {
+      "name": "Landslide_T01_FINAL",
+      "sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+      "sequence_length": 30,
+      "channels": 30
+    }
+  },
+  "preprocessing": {
+    "sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "training_only": true,
+    "refit_allowed": false
+  },
+  "output_policy": {
+    "probability_domain": [
+      0.0,
+      1.0
+    ],
+    "operational_threshold_locked": false,
+    "binary_decision_forced": false
+  },
+  "current_connection": {
+    "real_external_request_executed": false,
+    "reason": "Exact production mapping for all required live environmental channels is not yet locked."
+  },
+  "self_tests": {
+    "upstream_contracts": "PASS",
+    "live_payload_schema": "PASS",
+    "future_observation_guard": "PASS",
+    "same_day_causality": "PASS",
+    "causal_lag": "PASS",
+    "provider_abstraction": "PASS",
+    "credential_safety": "PASS",
+    "frozen_model_interface": "PASS",
+    "model_immutability": "PASS"
+  }
+}

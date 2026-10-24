@@ -1,0 +1,147 @@
+{
+  "registry_name": "M12_External_Source_Registry",
+  "registry_version": "1.0.0",
+  "created_utc": "2026-09-09T02:54:16.104178+00:00",
+  "status": "SOURCE_AUDIT_BASELINE",
+  "architecture": {
+    "principle": "External data providers are isolated behind source adapters. The M12 inference engine consumes only the standardized M12 input contract.",
+    "flow": [
+      "External provider",
+      "Provider-specific adapter",
+      "Source validation",
+      "Standardized M12 input",
+      "M12 feature construction",
+      "M12 sequence construction",
+      "M11 preprocessing",
+      "Frozen M11 model",
+      "Prediction output"
+    ],
+    "provider_lock_in": false,
+    "model_provider_dependency": false,
+    "frontend_provider_dependency": false,
+    "api_credentials_in_model": false,
+    "api_credentials_in_frontend": false
+  },
+  "status_definitions": {
+    "PRIMARY": "Preferred official or authoritative source identified for the required variable.",
+    "SECONDARY": "Authoritative alternative source available if the primary source is unavailable or unsuitable.",
+    "PENDING_VERIFICATION": "Potential source identified but endpoint, coverage, station mapping, cadence, or semantics still require technical verification.",
+    "FALLBACK_PAID": "Temporary paid source permitted only if the required operational variable cannot be obtained adequately from official/free sources.",
+    "NOT_REQUIRED": "Variable is supplied by frozen/static M11 representation and does not require a live external source."
+  },
+  "sources": {
+    "rainfall": {
+      "variable": "Rainfall_mm",
+      "status": "PRIMARY",
+      "provider": "India Meteorological Department",
+      "organization": "India Meteorological Department, Ministry of Earth Sciences, Government of India",
+      "source_type": "official_api",
+      "documented_api": true,
+      "api_description": "District Wise Rainfall API",
+      "endpoint": "https://mausam.imd.gov.in/api/districtwise_rainfall_api.php",
+      "expected_role": "Provide district rainfall observations for M12 operational input.",
+      "locked_model_variable": "Rainfall_mm",
+      "districts_required": [
+        "Kodagu",
+        "Uttara Kannada",
+        "Belagavi",
+        "Bagalkot"
+      ],
+      "requires_provider_adapter": true,
+      "credentials_required": "Not assumed; verify at implementation time",
+      "historical_replay_support": "Must be verified separately; operational API availability does not imply complete historical archive access.",
+      "verification_status": "DOCUMENTED_SOURCE_PENDING_RUNTIME_TEST"
+    },
+    "soil_moisture": {
+      "variable": [
+        "AM_soil_moisture",
+        "PM_soil_moisture"
+      ],
+      "status": "PRIMARY",
+      "provider": "MOSDAC / Space Applications Centre / ISRO",
+      "organization": "Space Applications Centre, Indian Space Research Organisation",
+      "source_type": "official_science_product",
+      "product_family": "SMAP-derived Soil Wetness / Soil Moisture",
+      "source_description": "MOSDAC provides SMAP L-band derived soil-moisture/soil-wetness products over the Indian region.",
+      "update_characteristic": "Official product documentation specifies a 3-day composite.",
+      "spatial_characteristic": "Official product documentation specifies approximately 40 km resolution resampled at 0.125 degrees.",
+      "temporal_start": "2015-04",
+      "locked_operational_rule": "Latest causal observation on or before target date, maximum age 7 days.",
+      "interpolation": false,
+      "blind_forward_fill": false,
+      "target_based_alignment": false,
+      "requires_provider_adapter": true,
+      "credentials_required": "Access mechanism must be verified during implementation.",
+      "historical_replay_support": true,
+      "verification_status": "OFFICIAL_PRODUCT_CONFIRMED_ACCESS_WORKFLOW_TO_VERIFY"
+    },
+    "river_water_level": {
+      "variable": [
+        "River_WL_1",
+        "River_WL_2",
+        "River_WL_3",
+        "River_WL_4",
+        "River_WL_5",
+        "River_WL_6",
+        "River_WL_7",
+        "River_WL_8",
+        "River_WL_9",
+        "River_WL_10",
+        "River_WL_11",
+        "River_WL_12",
+        "River_WL_13",
+        "River_WL_14"
+      ],
+      "status": "PENDING_VERIFICATION",
+      "preferred_provider": "Central Water Commission / India-WRIS",
+      "organization": "Central Water Commission, Government of India",
+      "source_type": "official_hydrological_observation_infrastructure",
+      "documented_capability": "CWC operates hydrological observation and flood forecasting stations that measure river gauge/water level and related hydrological variables.",
+      "real_time_capability": "CWC documentation describes real-time hydrological monitoring and near-real-time flood information.",
+      "exact_api_endpoint": null,
+      "exact_station_mapping": null,
+      "locked_channels_required": 14,
+      "requires_provider_adapter": true,
+      "credentials_required": "Must be determined after endpoint/access audit.",
+      "historical_replay_support": "Must be verified against the exact 14 M11 stations.",
+      "paid_fallback_allowed": true,
+      "paid_fallback_rule": "A paid one-month provider may be considered only if an authoritative/free source cannot supply the required 14-channel operational observations with defensible station mapping and temporal coverage.",
+      "verification_status": "CRITICAL_PENDING_EXACT_STATION_AND_ENDPOINT_AUDIT"
+    },
+    "terrain": {
+      "variable": [
+        "terrain_elevation_median",
+        "terrain_slope_median",
+        "terrain_aspect_circular_mean",
+        "terrain_curvature_median"
+      ],
+      "status": "NOT_REQUIRED",
+      "provider": "M11 frozen terrain representation",
+      "source_type": "frozen_static_artifact",
+      "live_api_required": false,
+      "target_dependent": false,
+      "daily_refresh_required": false,
+      "operational_rule": "Use the exact target-independent district-level terrain representation frozen in M11."
+    },
+    "labels": {
+      "variable": [
+        "Flood labels",
+        "Landslide labels"
+      ],
+      "status": "NOT_REQUIRED",
+      "prediction_input": false,
+      "operational_rule": "Labels are never fetched or supplied as model inputs during inference. They may only be used after inference for historical demonstration or post-hoc evaluation."
+    }
+  },
+  "implementation_rules": {
+    "provider_specific_logic_isolated": true,
+    "credentials_externalized": true,
+    "model_files_unchanged": true,
+    "m11_preprocessing_unchanged": true,
+    "m11_feature_contract_unchanged": true,
+    "m11_sequence_contract_unchanged": true,
+    "no_training": true,
+    "no_retraining": true,
+    "no_tuning": true
+  }
+}

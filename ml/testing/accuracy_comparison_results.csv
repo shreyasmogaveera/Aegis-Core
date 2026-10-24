@@ -1,0 +1,49 @@
+date,district,hazard,true_label,frozen_probability,openmeteo_probability,frozen_correct,openmeteo_correct,probability_drift
+2023-01-15,Bagalkot,Flood,0,0.4739,0.3996,True,True,0.0742
+2023-03-20,Bagalkot,Flood,0,0.4301,0.4053,True,True,0.0248
+2023-05-10,Bagalkot,Flood,0,0.4515,0.4721,True,True,0.0206
+2023-06-25,Bagalkot,Flood,0,0.3765,0.4508,True,True,0.0743
+2023-07-05,Bagalkot,Flood,1,0.4037,0.5028,False,True,0.099
+2023-07-20,Bagalkot,Flood,0,0.3602,0.5244,True,False,0.1642
+2023-08-10,Bagalkot,Flood,0,0.4419,0.4149,True,True,0.027
+2023-10-15,Bagalkot,Flood,0,0.4711,0.4023,True,True,0.0688
+2023-01-15,Belagavi,Flood,0,0.5717,0.6917,False,False,0.12
+2023-03-20,Belagavi,Flood,0,0.6953,0.6929,False,False,0.0024
+2023-05-10,Belagavi,Flood,0,0.6818,0.7121,False,False,0.0303
+2023-06-25,Belagavi,Flood,0,0.7248,0.6966,False,False,0.0282
+2023-07-05,Belagavi,Flood,1,0.691,0.7045,True,True,0.0135
+2023-07-20,Belagavi,Flood,0,0.7198,0.4872,False,True,0.2326
+2023-08-10,Belagavi,Flood,0,0.6618,0.3798,False,True,0.282
+2023-10-15,Belagavi,Flood,0,0.5762,0.6025,False,False,0.0263
+2023-01-15,Kodagu,Flood,0,0.5578,0.5404,False,False,0.0175
+2023-03-20,Kodagu,Flood,0,0.5634,0.5402,False,False,0.0232
+2023-05-10,Kodagu,Flood,0,0.5391,0.5406,False,False,0.0014
+2023-06-25,Kodagu,Flood,0,0.5509,0.54,False,False,0.0109
+2023-07-05,Kodagu,Flood,1,0.5756,0.862,True,True,0.2864
+2023-07-20,Kodagu,Flood,0,0.5628,0.9144,False,False,0.3516
+2023-08-10,Kodagu,Flood,0,0.5503,0.7697,False,False,0.2194
+2023-10-15,Kodagu,Flood,0,0.5541,0.5762,False,False,0.0221
+2023-01-15,Uttara Kannada,Flood,0,0.5197,0.5188,False,False,0.0008
+2023-03-20,Uttara Kannada,Flood,0,0.519,0.5189,False,False,0.0001
+2023-05-10,Uttara Kannada,Flood,0,0.5192,0.5225,False,False,0.0032
+2023-06-25,Uttara Kannada,Flood,0,0.5872,0.5711,False,False,0.0161
+2023-07-05,Uttara Kannada,Flood,1,0.724,0.727,True,True,0.003
+2023-07-20,Uttara Kannada,Flood,0,0.7506,0.7079,False,False,0.0427
+2023-08-10,Uttara Kannada,Flood,0,0.5518,0.5997,False,False,0.0479
+2023-10-15,Uttara Kannada,Flood,0,0.5182,0.536,False,False,0.0178
+2023-02-15,Kodagu,Landslide,0,0.008,0.0087,True,True,0.0008
+2023-05-20,Kodagu,Landslide,0,0.0088,0.0114,True,True,0.0026
+2023-06-25,Kodagu,Landslide,0,0.0085,0.0647,True,True,0.0562
+2023-07-05,Kodagu,Landslide,0,0.0112,0.5324,True,False,0.5212
+2023-07-15,Kodagu,Landslide,0,0.0121,0.6163,True,False,0.6042
+2023-07-23,Kodagu,Landslide,0,0.0276,0.6686,True,False,0.641
+2023-08-05,Kodagu,Landslide,0,0.6403,0.598,False,False,0.0423
+2023-10-20,Kodagu,Landslide,0,0.0103,0.3425,True,True,0.3322
+2023-02-15,Uttara Kannada,Landslide,0,0.0133,0.0182,True,True,0.0049
+2023-05-20,Uttara Kannada,Landslide,0,0.0144,0.0196,True,True,0.0052
+2023-06-25,Uttara Kannada,Landslide,0,0.0236,0.0397,True,True,0.016
+2023-07-05,Uttara Kannada,Landslide,0,0.2199,0.2652,True,True,0.0453
+2023-07-15,Uttara Kannada,Landslide,0,0.588,0.5399,False,False,0.0481
+2023-07-23,Uttara Kannada,Landslide,0,0.6607,0.5977,False,False,0.0629
+2023-08-05,Uttara Kannada,Landslide,0,0.612,0.5338,False,False,0.0781
+2023-10-20,Uttara Kannada,Landslide,0,0.0168,0.1946,True,True,0.1778

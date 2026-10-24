@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "purpose": "Reference the authoritative frozen M11 artifacts used by the M12 prediction pipeline.",
+  "artifacts": [
+    {
+      "name": "Flood_T06_FINAL.keras",
+      "absolute_source_path": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\FLOOD\\Flood_T06_FINAL.keras",
+      "sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+      "role": "frozen_flood_model"
+    },
+    {
+      "name": "Landslide_T01_FINAL.keras",
+      "absolute_source_path": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\LANDSLIDE\\Landslide_T01_FINAL.keras",
+      "sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+      "role": "frozen_landslide_model"
+    },
+    {
+      "name": "M11_Exact_Training_Preprocessing.npz",
+      "absolute_source_path": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\PREPROCESSING\\M11_Exact_Training_Preprocessing.npz",
+      "sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+      "role": "exact_training_preprocessing"
+    }
+  ],
+  "copy_policy": "M11 frozen artifacts are not duplicated or modified inside the M12 package. Their exact SHA-256 identities and authoritative source paths are recorded."
+}

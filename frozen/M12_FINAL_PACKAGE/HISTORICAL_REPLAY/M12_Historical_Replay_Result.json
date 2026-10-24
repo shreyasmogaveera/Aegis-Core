@@ -1,0 +1,85 @@
+{
+  "contract": {
+    "name": "M12_Historical_Replay",
+    "version": "1.0",
+    "status": "PASS"
+  },
+  "prediction": {
+    "prediction_id": "M12-HIST-LANDSLIDE-UTTARA_KANNADA-2024-07-04",
+    "mode": "historical_replay",
+    "model": "Landslide_T01_FINAL",
+    "hazard": "landslide",
+    "district": "Uttara Kannada",
+    "target_date": "2024-07-04",
+    "event_probability": 0.475433349609375,
+    "prediction_status": "prediction_ready",
+    "history_status": "complete",
+    "data_quality_status": "pass",
+    "smap_status": "same_day",
+    "smap_age_days": 0.0,
+    "model_sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+    "preprocessing_sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "sequence_length": 30,
+    "generated_utc": "2026-09-09T04:45:37Z",
+    "operational_decision": null
+  },
+  "historical_reference": {
+    "reference_source": "E:\\AEGIS-CORE\\OUTPUTS\\Landslide_Labels_GSI_UPDATED_DISTRICT_DAY_2015_2024.csv",
+    "reference_source_sha256": "39bd1af47c9c03fe67129f105cc29d32f7be9a7f4bdeb1ae5370f389f149cd8b",
+    "historical_label": 1,
+    "historical_event_status": "historical_event_present",
+    "comparison_stage": "post_inference_only"
+  },
+  "causal_history": {
+    "history_start": "2024-06-05",
+    "target_date": "2024-07-04",
+    "sequence_length": 30,
+    "future_observation_used": false,
+    "missing_daily_observation_fabricated": false
+  },
+  "input_representation": {
+    "environmental_features": [
+      "Rainfall_mm",
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ],
+    "environmental_channel_count": 15,
+    "missingness_channel_count": 15,
+    "total_model_channels": 30,
+    "label_in_model_input": false
+  },
+  "frozen_artifacts": {
+    "model_path": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\LANDSLIDE\\Landslide_T01_FINAL.keras",
+    "model_sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+    "preprocessing_path": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\PREPROCESSING\\M11_Exact_Training_Preprocessing.npz",
+    "preprocessing_sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb"
+  },
+  "replay_summary": {
+    "event_probability": 0.475433349609375,
+    "historical_label": 1,
+    "historical_event_status": "historical_event_present",
+    "threshold_applied": false,
+    "operational_decision": null
+  },
+  "guardrails": {
+    "retraining": false,
+    "tuning": false,
+    "recalibration": false,
+    "threshold_optimization": false,
+    "model_modification": false,
+    "label_leakage": false,
+    "future_data_usage": false
+  }
+}

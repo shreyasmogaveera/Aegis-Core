@@ -1,0 +1,88 @@
+{
+  "contract_name": "M12_Causal_Feature_Construction_Contract",
+  "contract_version": "1.0.0",
+  "created_utc": "2026-09-09T03:01:04.587081+00:00",
+  "status": "LOCKED_FOR_M12_DEVELOPMENT",
+  "purpose": "Construct the exact causal environmental feature representation required by the frozen M11 models.",
+  "flood": {
+    "feature_order": [
+      "Rainfall_mm",
+      "River_WL_1",
+      "River_WL_2",
+      "River_WL_3",
+      "River_WL_4",
+      "River_WL_5",
+      "River_WL_6",
+      "River_WL_7",
+      "River_WL_8",
+      "River_WL_9",
+      "River_WL_10",
+      "River_WL_11",
+      "River_WL_12",
+      "River_WL_13",
+      "River_WL_14"
+    ],
+    "feature_count": 15,
+    "derived_features": [],
+    "rule": "Preserve validated Rainfall_mm and River_WL_1 through River_WL_14 without introducing additional environmental features."
+  },
+  "landslide": {
+    "feature_order": [
+      "Rainfall_mm",
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ],
+    "feature_count": 15,
+    "rainfall_derived_features": [
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm"
+    ],
+    "rainfall_windows_days": [
+      3,
+      7,
+      15,
+      30
+    ],
+    "window_rule": "Each rolling sum uses only the current target date and preceding consecutive daily observations.",
+    "missing_date_rule": "A missing daily observation prevents completion of the corresponding rolling window. No interpolation or fabricated rainfall is permitted."
+  },
+  "causality": {
+    "future_observations_allowed": false,
+    "target_date_included": true,
+    "rainfall_interpolation": false,
+    "missing_date_fabrication": false,
+    "target_based_alignment": false
+  },
+  "deferred_to_cell_6": [
+    "causal_smap_age_days",
+    "AM_soil_moisture",
+    "PM_soil_moisture",
+    "AM_soil_moisture_available",
+    "PM_soil_moisture_available",
+    "SMAP_same_day",
+    "terrain_elevation_median",
+    "terrain_slope_median",
+    "terrain_aspect_circular_mean",
+    "terrain_curvature_median"
+  ],
+  "model_safety": {
+    "labels_as_inputs": false,
+    "future_data": false,
+    "preprocessing_refit": false,
+    "model_modification": false
+  }
+}

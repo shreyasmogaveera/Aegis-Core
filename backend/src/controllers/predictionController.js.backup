@@ -1,0 +1,169 @@
+const Prediction = require('../models/Prediction');
+const dataIngestionService = require('../services/dataIngestionService');
+const mlBridgeService = require('../services/mlBridgeService');
+const socketService = require('../services/socketService');
+
+class PredictionController {
+  formatPrediction(pred) {
+    return {
+      id: pred._id ? pred._id.toString() : undefined,
+      district: pred.district,
+      predictionType: (pred.predictionType || pred.prediction_type || 'FLOOD').toUpperCase(),
+      prediction_type: (pred.predictionType || pred.prediction_type || 'flood').toLowerCase(),
+      timeWindowHours: pred.timeWindowHours || pred.time_window_hours || 72,
+      riskScore: pred.riskScore !== undefined ? pred.riskScore : pred.risk_score,
+      confidence: pred.confidence,
+      riskLevel: pred.riskLevel || pred.risk_level,
+      recommendations: pred.recommendations || [],
+      environmentalInput: pred.environmentalInput || pred.environmental_data || {},
+      source: pred.source || 'mock',
+      createdAt: pred.createdAt || new Date(),
+      updatedAt: pred.updatedAt || new Date()
+    };
+  }
+
+  /**
+   * POST /api/v1/predictions/trigger
+   * Full 4-Layer Flow: Express -> Ingestion -> ML Bridge -> Flask -> MongoDB -> Socket.io
+   */
+  async triggerPrediction(req, res) {
+    try {
+      const {
+        district = 'Kodagu',
+        predictionType = 'flood',
+        timeWindowHours = 72,
+        customTelemetry
+      } = req.body;
+
+      // 1. Get Environmental telemetry
+      let telemetry = customTelemetry;
+      if (!telemetry) {
+        telemetry = await dataIngestionService.getEnvironmentalData(district);
+      }
+
+      // Save environmental snapshot to MongoDB
+      await dataIngestionService.ingestAndSaveEnvironmentalData(district).catch((e) => {
+        console.warn('[PredictionController] Environmental save warning:', e.message);
+      });
+
+      // 2. Call Flask AI/ML Service
+      let mlResult;
+      try {
+        mlResult = await mlBridgeService.predictRisk(
+          district,
+          telemetry,
+          timeWindowHours,
+          predictionType
+        );
+      } catch (mlErr) {
+        console.error('[PredictionController] Flask ML Bridge Error:', mlErr.message);
+        const statusCode = mlErr.status || 503;
+        return res.status(statusCode).json({
+          error: mlErr.message
+        });
+      }
+
+      // 3. Persist prediction in MongoDB
+      const newPrediction = await Prediction.create({
+        district: mlResult.district || district,
+        predictionType: (mlResult.prediction_type || predictionType).toUpperCase(),
+        timeWindowHours: mlResult.time_window_hours || timeWindowHours,
+        riskScore: mlResult.risk_score !== undefined ? mlResult.risk_score : 0.82,
+        confidence: mlResult.confidence !== undefined ? mlResult.confidence : 0.91,
+        riskLevel: (mlResult.risk_level || 'CRITICAL').toUpperCase(),
+        recommendations: mlResult.recommendations || [],
+        environmentalInput: telemetry,
+        source: 'mock'
+      });
+
+      const formatted = this.formatPrediction(newPrediction);
+
+      // 4. Emit Socket.io real-time event
+      socketService.notifyPredictionUpdated(formatted);
+
+      return res.status(201).json({
+        message: 'Risk prediction generated, persisted, and broadcasted successfully',
+        prediction: formatted
+      });
+    } catch (err) {
+      console.error('[PredictionController.triggerPrediction] Internal Error:', err);
+      return res.status(500).json({ error: 'Failed to process risk prediction pipeline' });
+    }
+  }
+
+  /**
+   * GET /api/v1/predictions/latest?district=Kodagu
+   */
+  async getLatestPrediction(req, res) {
+    try {
+      const { district = 'Kodagu' } = req.query;
+
+      let latest = await Prediction.findOne({
+        district: new RegExp(`^${district}$`, 'i')
+      }).sort({ createdAt: -1 });
+
+      if (!latest) {
+        // Trigger initial prediction for district
+        const telemetry = await dataIngestionService.getEnvironmentalData(district);
+        let mlResult;
+        try {
+          mlResult = await mlBridgeService.predictRisk(district, telemetry, 72, 'flood');
+        } catch (e) {
+          mlResult = {
+            district,
+            prediction_type: 'flood',
+            time_window_hours: 72,
+            risk_score: 0.82,
+            risk_level: 'CRITICAL',
+            confidence: 0.91,
+            recommendations: ['Monitor Cauvery river basins']
+          };
+        }
+
+        latest = await Prediction.create({
+          district: mlResult.district || district,
+          predictionType: (mlResult.prediction_type || 'flood').toUpperCase(),
+          timeWindowHours: mlResult.time_window_hours || 72,
+          riskScore: mlResult.risk_score,
+          confidence: mlResult.confidence,
+          riskLevel: (mlResult.risk_level || 'CRITICAL').toUpperCase(),
+          recommendations: mlResult.recommendations,
+          environmentalInput: telemetry,
+          source: 'mock'
+        });
+      }
+
+      return res.status(200).json(this.formatPrediction(latest));
+    } catch (err) {
+      console.error('[PredictionController.getLatestPrediction] Error:', err);
+      return res.status(500).json({ error: 'Failed to retrieve latest prediction' });
+    }
+  }
+
+  /**
+   * GET /api/v1/predictions/history?district=Kodagu
+   */
+  async getPredictionHistory(req, res) {
+    try {
+      const { district = 'Kodagu', limit = 20 } = req.query;
+
+      const history = await Prediction.find({
+        district: new RegExp(`^${district}$`, 'i')
+      })
+        .sort({ createdAt: -1 })
+        .limit(Number(limit) || 20);
+
+      const formatted = history.map((doc) => this.formatPrediction(doc));
+
+      return res.status(200).json({
+        count: formatted.length,
+        predictions: formatted
+      });
+    } catch (err) {
+      console.error('[PredictionController.getPredictionHistory] Error:', err);
+      return res.status(500).json({ error: 'Failed to retrieve prediction history' });
+    }
+  }
+}
+
+module.exports = new PredictionController();

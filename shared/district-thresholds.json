@@ -1,0 +1,128 @@
+{
+  "version": "1.0-level1-calibrated",
+  "methodology": "Empirical decision threshold calibration based on Youden J-statistic maximization and F1-harmonic score balance on 2015-2024 frozen historical sequences",
+  "provenance": {
+    "flood_training_sequences": 13128,
+    "landslide_training_sequences": 7248,
+    "date_range": "2015-01-01 to 2024-08-29",
+    "model_preservation": "Frozen M11 LSTM forward-pass probabilities are strictly preserved without modification or scaling"
+  },
+  "tier_semantics": {
+    "LOW": "Normal vigilance; environmental indicators within normal non-event range",
+    "MODERATE": "Heightened monitoring; environmental conditions elevated above dry baseline",
+    "HIGH": "Calibrated decision threshold breached; actionable hazard alert",
+    "CRITICAL": "Extreme risk threshold breached; immediate evacuation / response advisory"
+  },
+  "hazards": {
+    "flood": {
+      "districts": {
+        "Bagalkot": {
+          "thresholds": {
+            "moderate": 0.470,
+            "high": 0.495,
+            "critical": 0.580
+          },
+          "baseline_sample_size": {
+            "flood_days": 419,
+            "non_flood_days": 2864,
+            "total_days": 3283,
+            "positive_event_rate_pct": 12.76
+          },
+          "statistical_reliability": "HIGH",
+          "auc_roc": 0.8366,
+          "auc_pr": 0.4278,
+          "operational_notes": "Well-behaved probability distribution (range 0.17 to 0.67). Calibrated threshold yields 78.3% sensitivity and 78.5% specificity."
+        },
+        "Belagavi": {
+          "thresholds": {
+            "moderate": 0.530,
+            "high": 0.550,
+            "critical": 0.650
+          },
+          "baseline_sample_size": {
+            "flood_days": 530,
+            "non_flood_days": 2753,
+            "total_days": 3283,
+            "positive_event_rate_pct": 16.14
+          },
+          "statistical_reliability": "MODERATE_LOW",
+          "auc_roc": 0.5953,
+          "auc_pr": 0.1903,
+          "operational_notes": "Elevated probability baseline (min 0.4769, dry median 0.5276). Calibrated threshold cuts false alarms by 1,650 days (specificity rises from 1.3% to 61.2%), but feature discrimination remains challenging."
+        },
+        "Kodagu": {
+          "thresholds": {
+            "moderate": 0.555,
+            "high": 0.575,
+            "critical": 0.680
+          },
+          "baseline_sample_size": {
+            "flood_days": 768,
+            "non_flood_days": 2510,
+            "total_days": 3278,
+            "positive_event_rate_pct": 23.43
+          },
+          "statistical_reliability": "MODERATE",
+          "auc_roc": 0.5907,
+          "auc_pr": 0.3648,
+          "operational_notes": "High monsoon baseline. Calibrated threshold separates heavy precipitation saturation from river basin flood peaks; false alarms drop from 2,478 to 540 days (specificity rises from 1.3% to 78.5%)."
+        },
+        "Uttara Kannada": {
+          "thresholds": {
+            "moderate": 0.525,
+            "high": 0.550,
+            "critical": 0.680
+          },
+          "baseline_sample_size": {
+            "flood_days": 769,
+            "non_flood_days": 2515,
+            "total_days": 3284,
+            "positive_event_rate_pct": 23.42
+          },
+          "statistical_reliability": "MODERATE",
+          "auc_roc": 0.6018,
+          "auc_pr": 0.3406,
+          "operational_notes": "Compressed lower probability bound (min prob 0.5115). Global 0.50 cutoff failed with 0% specificity (100% false alarm rate); calibrated 0.55 threshold restores 73.6% specificity."
+        }
+      }
+    },
+    "landslide": {
+      "districts": {
+        "Kodagu": {
+          "thresholds": {
+            "moderate": 0.050,
+            "high": 0.350,
+            "critical": 0.650
+          },
+          "baseline_sample_size": {
+            "landslide_days": 12,
+            "non_landslide_days": 3612,
+            "total_days": 3624,
+            "positive_event_rate_pct": 0.33
+          },
+          "statistical_reliability": "CAUTION_LOW_SAMPLE_SIZE",
+          "auc_roc": 0.9704,
+          "auc_pr": 0.3026,
+          "operational_notes": "Extreme event sparsity (only 12 positive landslide days in 10 years). Threshold catches 10/12 events with 91.1% specificity, but estimate has high variance due to small sample size."
+        },
+        "Uttara Kannada": {
+          "thresholds": {
+            "moderate": 0.080,
+            "high": 0.450,
+            "critical": 0.650
+          },
+          "baseline_sample_size": {
+            "landslide_days": 8,
+            "non_landslide_days": 3616,
+            "total_days": 3624,
+            "positive_event_rate_pct": 0.22
+          },
+          "statistical_reliability": "CAUTION_VERY_LOW_SAMPLE_SIZE",
+          "auc_roc": 0.9562,
+          "auc_pr": 0.1092,
+          "operational_notes": "Severe class imbalance (only 8 positive landslide days in 10 years). Threshold catches 8/8 events with 83.0% specificity, but high uncertainty surrounds precision-recall boundary."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+__pycache__/
+*.log
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Large satellite staging files & parts (>100MB)
+*.h5
+*.part
+smap_staging/
+

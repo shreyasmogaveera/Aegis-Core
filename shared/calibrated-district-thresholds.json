@@ -1,0 +1,110 @@
+{
+  "version": "2.0-level2-calibrated-thresholds",
+  "methodology": "Empirical decision threshold optimization (Youden J-statistic maximization and F1-harmonic balance) applied directly to Level 2 calibrated probability distributions",
+  "hazards": {
+    "flood": {
+      "districts": {
+        "Bagalkot": {
+          "thresholds": {
+            "moderate": 0.0450,
+            "high": 0.2000,
+            "critical": 0.3500
+          },
+          "calibration_method": "isotonic",
+          "baseline_sample_size": {
+            "flood_days": 419,
+            "non_flood_days": 2864,
+            "total_days": 3283,
+            "positive_event_rate_pct": 12.76
+          },
+          "statistical_reliability": "HIGH",
+          "operational_notes": "Calibrated probability range [0.00, 1.00]. Non-event median is 0.034. High alert at 0.20 yields optimal Youden J=0.598 (85% sensitivity, 75% specificity)."
+        },
+        "Belagavi": {
+          "thresholds": {
+            "moderate": 0.0800,
+            "high": 0.2000,
+            "critical": 0.2800
+          },
+          "calibration_method": "secondary_physical_rf",
+          "baseline_sample_size": {
+            "flood_days": 217,
+            "non_flood_days": 2325,
+            "total_days": 2542,
+            "positive_event_rate_pct": 8.54
+          },
+          "statistical_reliability": "HIGH",
+          "operational_notes": "Authoritative operational probability produced by 26-feature secondary physical classifier (Random Forest, ROC-AUC 0.9790). Frozen LSTM raw probability retained in audit logs."
+        },
+        "Kodagu": {
+          "thresholds": {
+            "moderate": 0.2290,
+            "high": 0.2450,
+            "critical": 0.3500
+          },
+          "calibration_method": "platt",
+          "baseline_sample_size": {
+            "flood_days": 768,
+            "non_flood_days": 2510,
+            "total_days": 3278,
+            "positive_event_rate_pct": 23.43
+          },
+          "statistical_reliability": "MODERATE",
+          "operational_notes": "Platt calibrated probability smoothly separates historical flood event (0.261) from dry days (0.226 - 0.248) at high threshold 0.245."
+        },
+        "Uttara Kannada": {
+          "thresholds": {
+            "moderate": 0.2200,
+            "high": 0.2500,
+            "critical": 0.3100
+          },
+          "calibration_method": "isotonic",
+          "baseline_sample_size": {
+            "flood_days": 769,
+            "non_flood_days": 2515,
+            "total_days": 3284,
+            "positive_event_rate_pct": 23.42
+          },
+          "statistical_reliability": "HIGH",
+          "operational_notes": "Isotonic calibration achieves 100% sensitivity on validation events with 92.9% specificity. Alert threshold 0.250 reliably flags major events (0.541 on 2023-07-05)."
+        }
+      }
+    },
+    "landslide": {
+      "districts": {
+        "Kodagu": {
+          "thresholds": {
+            "moderate": 0.050,
+            "high": 0.350,
+            "critical": 0.650
+          },
+          "calibration_method": "uncalibrated_identity",
+          "baseline_sample_size": {
+            "landslide_days": 12,
+            "non_landslide_days": 3612,
+            "total_days": 3624,
+            "positive_event_rate_pct": 0.33
+          },
+          "statistical_reliability": "CAUTION_LOW_SAMPLE_SIZE",
+          "operational_notes": "Landslide model raw outputs already exhibit well-calibrated separation (ROC-AUC 0.9704, non-event median 0.0091)."
+        },
+        "Uttara Kannada": {
+          "thresholds": {
+            "moderate": 0.050,
+            "high": 0.350,
+            "critical": 0.650
+          },
+          "calibration_method": "uncalibrated_identity",
+          "baseline_sample_size": {
+            "landslide_days": 8,
+            "non_landslide_days": 3616,
+            "total_days": 3624,
+            "positive_event_rate_pct": 0.22
+          },
+          "statistical_reliability": "CAUTION_LOW_SAMPLE_SIZE",
+          "operational_notes": "Landslide model raw outputs already exhibit well-calibrated separation (ROC-AUC 0.9562, non-event median 0.0153)."
+        }
+      }
+    }
+  }
+}

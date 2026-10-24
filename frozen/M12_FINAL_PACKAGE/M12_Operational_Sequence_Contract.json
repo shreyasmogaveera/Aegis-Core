@@ -1,0 +1,48 @@
+{
+  "contract_name": "M12_Operational_Sequence_Contract",
+  "contract_version": "1.0.0",
+  "created_utc": "2026-09-09T03:07:25.640553+00:00",
+  "status": "LOCKED_FOR_M12_DEVELOPMENT",
+  "purpose": "Construct causal operational LSTM sequences using the exact temporal geometry required by M11.",
+  "Flood": {
+    "sequence_length_days": 15,
+    "window": "t-14 ... t",
+    "target_alignment": "target t",
+    "environmental_channels": 15,
+    "post_missingness_channels": 30,
+    "district_isolation": true,
+    "consecutive_daily_history_required": true
+  },
+  "Landslide": {
+    "sequence_length_days": 30,
+    "window": "t-29 ... t",
+    "target_alignment": "target t",
+    "environmental_channels": 15,
+    "post_missingness_channels": 30,
+    "district_isolation": true,
+    "consecutive_daily_history_required": true
+  },
+  "sequence_rules": {
+    "chronological_order": true,
+    "future_observations_allowed": false,
+    "target_date_included": true,
+    "labels_in_feature_tensor": false,
+    "district_crossing": false,
+    "missing_date_fabrication": false,
+    "environmental_missingness_preserved": true
+  },
+  "output_dtype": "float32",
+  "output_geometry": {
+    "Flood": [
+      "n_samples",
+      15,
+      15
+    ],
+    "Landslide": [
+      "n_samples",
+      30,
+      15
+    ],
+    "post_m11_preprocessing_channels": 30
+  }
+}

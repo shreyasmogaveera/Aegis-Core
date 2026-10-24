@@ -1,0 +1,77 @@
+{
+  "contract_name": "M12_Frozen_Model_Inference_Contract",
+  "contract_version": "1.0",
+  "status": "FROZEN_FOR_M12_INFERENCE",
+  "m11_models": {
+    "flood": {
+      "model_name": "Flood_T06_FINAL",
+      "artifact": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\FLOOD\\Flood_T06_FINAL.keras",
+      "sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+      "input_shape": [
+        null,
+        15,
+        30
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "parameter_count": 85569
+    },
+    "landslide": {
+      "model_name": "Landslide_T01_FINAL",
+      "artifact": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\LANDSLIDE\\Landslide_T01_FINAL.keras",
+      "sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+      "input_shape": [
+        null,
+        30,
+        30
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "parameter_count": 8609
+    }
+  },
+  "inference": {
+    "operation": "forward_pass_only",
+    "training": false,
+    "fine_tuning": false,
+    "recalibration": false,
+    "threshold_optimization": false,
+    "weight_modification": false,
+    "probability_range": [
+      0.0,
+      1.0
+    ],
+    "output": "event_probability"
+  },
+  "input_contract": {
+    "flood": {
+      "sequence_length": 15,
+      "channels": 30
+    },
+    "landslide": {
+      "sequence_length": 30,
+      "channels": 30
+    }
+  },
+  "verification": {
+    "model_discovery": "PASS",
+    "model_sha_identity": "PASS",
+    "model_loading": "PASS",
+    "architecture": "PASS",
+    "flood_inference": "PASS",
+    "landslide_inference": "PASS",
+    "deterministic_inference": "PASS",
+    "single_sample_inference": "PASS",
+    "model_immutability": "PASS",
+    "inference_only": "PASS"
+  },
+  "upstream": {
+    "cell8_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Exact_M11_Preprocessing_Contract.json",
+    "cell8_contract_sha256": "ab8f55e7692b594e2e1bd0a86a6a2eb3d4159f94adf9b208420892002f6056d1"
+  },
+  "m12_rule": "M12 inference shall use only the frozen M11 Flood T06 and Landslide T01 model artifacts. No training, fine-tuning, recalibration, threshold optimization, or model-weight modification is permitted."
+}

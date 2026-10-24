@@ -1,0 +1,87 @@
+{
+  "contract_name": "M12_Data_Validation_Contract",
+  "contract_version": "1.0.1",
+  "created_utc": "2026-09-09T02:57:39.182803+00:00",
+  "status": "LOCKED_FOR_M12_DEVELOPMENT",
+  "purpose": "Prevent malformed, non-causal, duplicated, or semantically invalid external observations from silently entering the M12 inference pipeline.",
+  "flood": {
+    "required_columns": [
+      "Date",
+      "District",
+      "Rainfall_mm",
+      "River_WL_1",
+      "River_WL_2",
+      "River_WL_3",
+      "River_WL_4",
+      "River_WL_5",
+      "River_WL_6",
+      "River_WL_7",
+      "River_WL_8",
+      "River_WL_9",
+      "River_WL_10",
+      "River_WL_11",
+      "River_WL_12",
+      "River_WL_13",
+      "River_WL_14"
+    ],
+    "allowed_districts": [
+      "Kodagu",
+      "Uttara Kannada",
+      "Belagavi",
+      "Bagalkot"
+    ],
+    "river_channels": 14,
+    "rainfall_required": true,
+    "river_missing_allowed_at_raw_stage": true,
+    "chronological_sort_required_before_sequence": true
+  },
+  "landslide": {
+    "required_columns": [
+      "Date",
+      "District",
+      "Rainfall_mm"
+    ],
+    "optional_columns": [
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_observation_date",
+      "PM_soil_moisture_observation_date"
+    ],
+    "allowed_districts": [
+      "Kodagu",
+      "Uttara Kannada"
+    ],
+    "rainfall_required": true,
+    "soil_moisture_missing_allowed": true,
+    "chronological_sort_required_before_sequence": true
+  },
+  "causality": {
+    "future_observations": "prohibited",
+    "target_date_alignment": "causal",
+    "smap_max_age_days": 7,
+    "smap_interpolation": false,
+    "smap_blind_forward_fill": false,
+    "smap_target_based_alignment": false
+  },
+  "duplicates": {
+    "duplicate_observations": "rejected"
+  },
+  "numeric_rules": {
+    "finite_required": true,
+    "negative_rainfall": "rejected",
+    "invented_river_range": "prohibited",
+    "invented_smap_range": "prohibited"
+  },
+  "failure_policy": {
+    "silent_fabrication": false,
+    "silent_future_data_usage": false,
+    "silent_duplicate_resolution": false,
+    "controlled_validation_failure": true
+  },
+  "model_safety": {
+    "labels_as_inputs": false,
+    "training_during_validation": false,
+    "preprocessing_refit": false,
+    "model_modification": false
+  }
+}

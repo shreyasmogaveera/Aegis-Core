@@ -1,0 +1,8 @@
+{
+  "riskLevels": {
+    "LOW": { "color": "#38bdf8", "label": "Low Risk", "severity": 1 },
+    "MODERATE": { "color": "#facc15", "label": "Moderate Risk", "severity": 2 },
+    "HIGH": { "color": "#f1a02b", "label": "High Risk", "severity": 3 },
+    "CRITICAL": { "color": "#ef4444", "label": "Critical Danger", "severity": 4 }
+  }
+}

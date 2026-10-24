@@ -1,0 +1,125 @@
+{
+  "contract_name": "M12_Multi_District_Batch_Contract",
+  "contract_version": "3.0",
+  "status": "PASS",
+  "purpose": "Multi-district batch inference using frozen M11 models and exact M11 training preprocessing.",
+  "target_date": "2024-12-31",
+  "scope": {
+    "operational_batch_test": true,
+    "statistical_evaluation": false,
+    "independent_test_benchmark": false,
+    "live_external_api_request": false,
+    "labels_used_as_model_input": false
+  },
+  "districts": {
+    "flood": [
+      "Kodagu",
+      "Uttara Kannada",
+      "Belagavi",
+      "Bagalkot"
+    ],
+    "landslide": [
+      "Kodagu",
+      "Uttara Kannada"
+    ]
+  },
+  "feature_order": {
+    "flood": [
+      "Rainfall_mm",
+      "Almatti Reservoir",
+      "Cholachagudda",
+      "Gokak falls",
+      "Harangi Reservoir",
+      "Hidkal Reservoir",
+      "Hipparagi Barrage",
+      "KUDIGE",
+      "MUKKODLU",
+      "Malaprabha Dam",
+      "Mudhol",
+      "NAPOKLU",
+      "Narayanapur Reservoir",
+      "SANTEGULI",
+      "Sadalga (Seasonal)"
+    ],
+    "landslide": [
+      "Rainfall_mm",
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ]
+  },
+  "sequence_lengths": {
+    "flood": 15,
+    "landslide": 30
+  },
+  "transformed_channels": 30,
+  "models": {
+    "flood": {
+      "name": "Flood_T06_FINAL",
+      "sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+      "parameter_count": 85569
+    },
+    "landslide": {
+      "name": "Landslide_T01_FINAL",
+      "sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+      "parameter_count": 8609
+    }
+  },
+  "preprocessing": {
+    "sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "training_only": true,
+    "refit": false
+  },
+  "output": {
+    "records": 6,
+    "canonical_schema": true,
+    "probability_range": [
+      0.0,
+      1.0
+    ],
+    "threshold_applied": false,
+    "operational_decision_forced": false
+  },
+  "guardrails": {
+    "labels_as_features": false,
+    "future_observations": false,
+    "district_crossing": false,
+    "retraining": false,
+    "tuning": false,
+    "recalibration": false,
+    "model_modification": false,
+    "preprocessing_refit": false
+  },
+  "artifacts": {
+    "batch_csv": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\BATCH\\M12_Multi_District_Batch_Predictions.csv",
+    "batch_csv_sha256": "929dc7158dc295359a960ad1cb55c8592ba032d38a4745f07a65430ebc9dcab1"
+  },
+  "self_tests": {
+    "upstream_audit": "PASS",
+    "flood_feature_schema": "PASS",
+    "landslide_feature_schema": "PASS",
+    "label_exclusion": "PASS",
+    "exact_preprocessing": "PASS",
+    "flood_batch_shape": "PASS",
+    "landslide_batch_shape": "PASS",
+    "district_independence": "PASS",
+    "frozen_model_identity": "PASS",
+    "batch_inference": "PASS",
+    "determinism": "PASS",
+    "canonical_output": "PASS",
+    "district_coverage": "PASS",
+    "artifact_roundtrip": "PASS",
+    "immutability": "PASS"
+  }
+}

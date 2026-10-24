@@ -1,0 +1,7 @@
+Model,Stage,Artifact_Type,Filename,SHA256,Shape,Sequence_Length_Days,Feature_Count,Positive_Targets,Negative_Targets,NaN_Count,Infinity_Count,Temporal_Contract,Imputation,Scaling,Train_Validation_Test_Split,Causal,District_Boundary_Crossing,Frozen
+Flood,M7,Source,Flood_Modelling_Dataset_M4_FROZEN.csv,4f87fa768bba3e3cac14deceb52bf9cc0faf3f48efb89087eaed6f73350c76b7,14612 x 36,15,15,2486,10642,,0,[t-14 ... t] -> Flood(t),NONE,NONE,NONE,YES,NONE,YES
+Flood,M7,Sequence,Flood_Sequences_M7_FROZEN.npz,5cd8ae42d695224e453e800aeb0322b85be8e06ae51109114bb7c884bf6c6792,13128 x 15 x 15,15,15,2486,10642,2237571,0,[t-14 ... t] -> Flood(t),NONE,NONE,NONE,YES,NONE,YES
+Flood,M7,Metadata,Flood_Sequence_Metadata_M7_FROZEN.csv,ed5424e2dffa8196361fa7c658554ab43d2c617cf26ec9c3e87a97b8a8eb94ba,13128 x 6,15,15,2486,10642,,0,[t-14 ... t] -> Flood(t),NONE,NONE,NONE,YES,NONE,YES
+Landslide,M7,Source,Landslide_Modelling_Dataset_M6_GSI_UPDATED_FROZEN.csv,6b29708b1d825abe253f64bf5f8e02863739af4167afac10f4d3c9f8645869ef,7306 x 18,30,15,20,7228,,0,[t-29 ... t] -> Landslide(t),NONE,NONE,NONE,YES,NONE,YES
+Landslide,M7,Sequence,Landslide_Sequences_M7_FROZEN.npz,45b77004548f2952e09decd9de6566691bd679bdfc12b14c3b15008a3ea8afc8,7248 x 30 x 15,30,15,20,7228,236819,0,[t-29 ... t] -> Landslide(t),NONE,NONE,NONE,YES,NONE,YES
+Landslide,M7,Metadata,Landslide_Sequence_Metadata_M7_FROZEN.csv,0e7ea1cf96c4e74ecce95e8e8395a74315a119e8bb14f008780389b2ef129efe,7248 x 6,30,15,20,7228,,0,[t-29 ... t] -> Landslide(t),NONE,NONE,NONE,YES,NONE,YES

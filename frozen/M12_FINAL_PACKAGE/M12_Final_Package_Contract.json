@@ -1,0 +1,60 @@
+{
+  "milestone": "M12",
+  "cell": 17,
+  "title": "Final Package",
+  "status": "PASS",
+  "generated_utc": "2026-09-09T05:40:03.869144+00:00",
+  "package": {
+    "path": "E:\\AEGIS-CORE\\OUTPUTS\\M12_FINAL_PACKAGE",
+    "artifact_count": 18,
+    "manifest_path": "E:\\AEGIS-CORE\\OUTPUTS\\M12_FINAL_PACKAGE\\M12_FINAL_PACKAGE_SHA256_MANIFEST.csv",
+    "manifest_sha256": "65e80dc07e0ee91803a345330a693193d1bd6e1874e3f24e8d39326a2ba0c5ea",
+    "metadata_path": "E:\\AEGIS-CORE\\OUTPUTS\\M12_FINAL_PACKAGE\\M12_FINAL_PACKAGE_METADATA.json",
+    "metadata_sha256": "850b03dc76ea97bc4c400a569dd713837a0081bb6867eb529a3b150001b87d5c"
+  },
+  "m11": {
+    "flood_model_sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+    "landslide_model_sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+    "preprocessing_sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "copied_into_m12_package": false,
+    "reference_recorded": true
+  },
+  "m12": {
+    "completed_contracts": 14,
+    "cells": [
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "source_artifacts_copied": 17
+  },
+  "operational_components": {
+    "historical_replay": true,
+    "live": true,
+    "batch": true
+  },
+  "integrity": {
+    "byte_exact_copy_verification": true,
+    "sha256_manifest": true,
+    "source_m12_unchanged": true,
+    "m11_unchanged": true
+  },
+  "rules": {
+    "retraining": false,
+    "preprocessing_refit": false,
+    "model_modification": false,
+    "thresholding": false,
+    "label_injection": false
+  }
+}

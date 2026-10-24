@@ -1,0 +1,106 @@
+{
+  "milestone": "M12",
+  "cell": 15,
+  "title": "M11 Compatibility / Reproduction",
+  "status": "PASS",
+  "purpose": "Verify compatibility between the M12 inference architecture and the frozen M11 models and exact M11 preprocessing artifact.",
+  "artifact_discovery": {
+    "m12_cell8_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Exact_M11_Preprocessing_Contract.json",
+    "m12_cell9_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Frozen_Model_Inference_Contract.json",
+    "m12_cell13_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\BATCH\\M12_Multi_District_Batch_Contract.json",
+    "m12_cell14_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Adversarial_Testing_Contract.json",
+    "m11_cell5_reproduction_audit": "E:\\AEGIS-CORE\\OUTPUTS\\M11_FINAL_MODEL_PACKAGE\\AUDIT\\M11_Cell5_Frozen_Test_Reproduction_Audit.csv",
+    "m11_cell5_matching_copy_count": 2
+  },
+  "frozen_hashes": {
+    "flood_model_sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+    "landslide_model_sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+    "preprocessing_sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "m11_cell5_audit_sha256": "eb835b5fefbad2f73c0bb0a83d9e24d5d3b49107418e7c6a1d5b0a29f4529918"
+  },
+  "model_interfaces": {
+    "flood_input_shape": [
+      15,
+      30
+    ],
+    "landslide_input_shape": [
+      30,
+      30
+    ],
+    "flood_parameters": 85569,
+    "landslide_parameters": 8609
+  },
+  "feature_channels": {
+    "flood": [
+      "Rainfall_mm",
+      "Almatti Reservoir",
+      "Cholachagudda",
+      "Gokak falls",
+      "Harangi Reservoir",
+      "Hidkal Reservoir",
+      "Hipparagi Barrage",
+      "KUDIGE",
+      "MUKKODLU",
+      "Malaprabha Dam",
+      "Mudhol",
+      "NAPOKLU",
+      "Narayanapur Reservoir",
+      "SANTEGULI",
+      "Sadalga (Seasonal)"
+    ],
+    "landslide": [
+      "Rainfall_mm",
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ]
+  },
+  "m11_reproduction": {
+    "probability_tolerance": 1e-07,
+    "flood": {
+      "max_absolute_difference": 2.977905277923e-08,
+      "mean_absolute_difference": 8.385768071657e-09
+    },
+    "landslide": {
+      "max_absolute_difference": 2.978668212084e-08,
+      "mean_absolute_difference": 1.705208738087e-09
+    }
+  },
+  "interface_determinism": {
+    "flood_max_difference": 0.0,
+    "landslide_max_difference": 0.0
+  },
+  "rules": {
+    "retraining": false,
+    "preprocessing_refit": false,
+    "thresholding": false,
+    "label_input": false,
+    "model_modification": false,
+    "source_modification": false
+  },
+  "checks": {
+    "core_m11_artifacts": true,
+    "m12_upstream_contracts": true,
+    "frozen_hashes": true,
+    "m11_cell5_reproduction_audit": true,
+    "exact_preprocessing": true,
+    "model_interface": true,
+    "feature_compatibility": true,
+    "interface_inference": true,
+    "probability_bounds": true,
+    "determinism": true,
+    "immutability": true,
+    "inference_purity": true
+  }
+}

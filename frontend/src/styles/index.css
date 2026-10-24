@@ -1,0 +1,318 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Primary Palette ── */
+  --color-primary: #8ed5ff;
+  --color-primary-container: #38bdf8;
+  --color-on-primary-container: #004965;
+  --color-on-primary: #00354a;
+  --color-primary-fixed: #c4e7ff;
+  --color-primary-fixed-dim: #7bd0ff;
+  --color-inverse-primary: #00668a;
+
+  /* ── Background & Surface (Near-Black #0a0e14 system with #131820 card surfaces) ── */
+  --color-background: #0a0e14;
+  --color-on-background: #e2e8f0;
+  --color-surface: #0a0e14;
+  --color-surface-dim: #070a0f;
+  --color-surface-bright: #2d333b;
+  --color-surface-container-lowest: #05080c;
+  --color-surface-container-low: #0e131a;
+  --color-surface-container: #131820;
+  --color-surface-container-high: #1a212b;
+  --color-surface-container-highest: #232b38;
+  --color-surface-variant: #1a212b;
+  --color-surface-tint: #7bd0ff;
+  --color-on-surface: #f1f5f9;
+  --color-on-surface-variant: #94a3b8;
+  --color-inverse-surface: #f1f5f9;
+  --color-inverse-on-surface: #1e293b;
+
+  /* ── Outline ── */
+  --color-outline: #64748b;
+  --color-outline-variant: #334155;
+
+  /* ── Error / Risk ── */
+  --color-error: #ef4444;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+  --color-risk-critical: #ef4444;
+  --color-risk-high: #f59e0b;
+  --color-risk-moderate: #3b82f6;
+  --color-risk-low: #22c55e;
+
+  /* ── Tertiary (Amber/Warning) ── */
+  --color-tertiary: #ffc176;
+  --color-tertiary-container: #f1a02b;
+  --color-on-tertiary: #472a00;
+  --color-on-tertiary-container: #613b00;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb960;
+
+  /* ── Secondary ── */
+  --color-secondary: #b9c8de;
+  --color-secondary-container: #39485a;
+  --color-on-secondary: #233143;
+  --color-on-secondary-container: #a7b6cc;
+  --color-secondary-fixed: #d4e4fa;
+  --color-secondary-fixed-dim: #b9c8de;
+
+  /* ── Font Families (Inter for headings/body/labels; JetBrains Mono strictly for data/metrics) ── */
+  --font-headline-lg: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-headline-md: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body-lg: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body-md: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display-stat: 'JetBrains Mono', ui-monospace, monospace;
+  --font-label-caps: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-data-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Spacing ── */
+  --spacing-gutter: 16px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 32px;
+  --spacing-panel-padding: 20px;
+  --spacing-unit: 4px;
+}
+
+/* ── Glass Panel ── */
+@layer utilities {
+  .glass-panel {
+    background-color: rgba(19, 24, 32, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+  }
+
+  .glass-panel-light {
+    background-color: rgba(26, 33, 43, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Standardized Map Floating Dock Card */
+  .map-dock-card {
+    background-color: rgba(19, 24, 32, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ── Input Styles ── */
+  .input-technical {
+    background-color: #070a0f;
+    border: 1px solid transparent;
+    border-bottom: 1px solid #3e484f;
+    color: #e0e2ea;
+    transition: border-color 0.2s ease-in-out;
+  }
+  .input-technical:focus {
+    outline: none;
+    border-bottom: 1px solid #38bdf8;
+    box-shadow: none;
+  }
+
+  .input-dark {
+    background-color: #070a0f;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e2ea;
+    transition: border-color 0.3s ease;
+  }
+  .input-dark:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: none;
+  }
+
+  /* ── Map & Grid Patterns ── */
+  .map-pattern {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── Scrollbar ── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+  /* ── Animations ── */
+  .pulse-live {
+    animation: pulse-red 2s infinite;
+  }
+
+  /* ── Scanlines Effect ── */
+  .scanlines {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(0, 0, 0, 0.1)
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+
+  /* ── Status Borders ── */
+  .critical-border { border-left: 4px solid #ef4444; }
+  .high-border { border-left: 4px solid #f59e0b; }
+  .moderate-border { border-left: 4px solid #3b82f6; }
+  .low-border { border-left: 4px solid #22c55e; }
+
+  /* ── Status Dot ── */
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* ── Status Chip ── */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    background-color: rgba(16, 20, 25, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── Map Markers ── */
+  .marker {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  .marker.available {
+    background-color: #38bdf8;
+  }
+  .marker.near-capacity {
+    background-color: #f1a02b;
+  }
+  .marker.full {
+    background-color: #ef4444;
+  }
+}
+
+/* ── Leaflet Clean Light Map Customization ── */
+@import "leaflet/dist/leaflet.css";
+
+.leaflet-container {
+  background-color: #f1f5f9 !important;
+  font-family: 'Inter', sans-serif !important;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Light/Neutral OpenStreetMap Tile Layer - No dark invert filter */
+.leaflet-tile-pane {
+  filter: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #0f172a !important;
+  border-radius: 14px !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.18), 0 4px 12px -2px rgba(0, 0, 0, 0.08) !important;
+  padding: 2px !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  line-height: 1.5 !important;
+}
+
+.leaflet-popup-tip {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: #64748b !important;
+  padding: 8px 10px 0 0 !important;
+  font-size: 16px !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #0f172a !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.leaflet-control-attribution a {
+  color: #0284c7 !important;
+}
+
+/* Permanent Clean District Map Tooltip */
+.clean-district-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  border-radius: 6px !important;
+  color: #0f172a !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  padding: 3px 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+.clean-district-tooltip::before {
+  display: none !important;
+}
+
+/* ── Global Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* ── Keyframes ── */
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes user-pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  70% { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(0.9); opacity: 0; }
+}

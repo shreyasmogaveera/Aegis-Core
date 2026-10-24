@@ -1,0 +1,360 @@
+{
+  "contract_name": "M12_Prediction_Input_Contract",
+  "contract_version": "1.0.0",
+  "created_utc": "2026-09-09T02:50:46.845742+00:00",
+  "status": "LOCKED_FOR_M12_DEVELOPMENT",
+  "project_period": {
+    "start": "2015-01-01",
+    "end": "2024-12-31"
+  },
+  "models": {
+    "Flood": {
+      "model_identity": "M11_Flood_T06_FINAL",
+      "districts": [
+        "Kodagu",
+        "Uttara Kannada",
+        "Belagavi",
+        "Bagalkot"
+      ],
+      "feature_order": [
+        "Rainfall_mm",
+        "River_WL_1",
+        "River_WL_2",
+        "River_WL_3",
+        "River_WL_4",
+        "River_WL_5",
+        "River_WL_6",
+        "River_WL_7",
+        "River_WL_8",
+        "River_WL_9",
+        "River_WL_10",
+        "River_WL_11",
+        "River_WL_12",
+        "River_WL_13",
+        "River_WL_14"
+      ],
+      "sequence_length": 15,
+      "lstm_channels": 30
+    },
+    "Landslide": {
+      "model_identity": "M11_Landslide_T01_FINAL",
+      "districts": [
+        "Kodagu",
+        "Uttara Kannada"
+      ],
+      "feature_order": [
+        "Rainfall_mm",
+        "rainfall_sum_3d_mm",
+        "rainfall_sum_7d_mm",
+        "rainfall_sum_15d_mm",
+        "rainfall_sum_30d_mm",
+        "causal_smap_age_days",
+        "AM_soil_moisture",
+        "PM_soil_moisture",
+        "AM_soil_moisture_available",
+        "PM_soil_moisture_available",
+        "SMAP_same_day",
+        "terrain_elevation_median",
+        "terrain_slope_median",
+        "terrain_aspect_circular_mean",
+        "terrain_curvature_median"
+      ],
+      "sequence_length": 30,
+      "lstm_channels": 30
+    }
+  },
+  "common_input": {
+    "mode": {
+      "type": "string",
+      "allowed_values": [
+        "live",
+        "historical_replay"
+      ],
+      "required": true,
+      "description": "Identifies whether the prediction uses current external observations or historical observations."
+    },
+    "Date": {
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "required": true,
+      "description": "Target prediction date. No observation after this date may be used."
+    },
+    "District": {
+      "type": "string",
+      "required": true,
+      "description": "Karnataka project district associated with the prediction."
+    }
+  },
+  "raw_inputs": {
+    "Flood": {
+      "Date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "required": true
+      },
+      "District": {
+        "type": "string",
+        "required": true,
+        "allowed_values": [
+          "Kodagu",
+          "Uttara Kannada",
+          "Belagavi",
+          "Bagalkot"
+        ]
+      },
+      "Rainfall_mm": {
+        "type": "float",
+        "required": true,
+        "unit": "mm/day",
+        "description": "Daily district rainfall observation."
+      },
+      "River_WL_1": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_2": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_3": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_4": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_5": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_6": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_7": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_8": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_9": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_10": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_11": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_12": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_13": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      },
+      "River_WL_14": {
+        "type": "float",
+        "required": true,
+        "unit": "water-level-source-unit",
+        "description": "Daily water-level observation mapped to the locked M11 river channel."
+      }
+    },
+    "Landslide": {
+      "Date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "required": true
+      },
+      "District": {
+        "type": "string",
+        "required": true,
+        "allowed_values": [
+          "Kodagu",
+          "Uttara Kannada"
+        ]
+      },
+      "Rainfall_mm": {
+        "type": "float",
+        "required": true,
+        "unit": "mm/day",
+        "description": "Daily district rainfall observation."
+      },
+      "AM_soil_moisture": {
+        "type": "float",
+        "required": false,
+        "unit": "product-specific",
+        "description": "Latest available causal AM soil-moisture observation on or before the target date."
+      },
+      "PM_soil_moisture": {
+        "type": "float",
+        "required": false,
+        "unit": "product-specific",
+        "description": "Latest available causal PM soil-moisture observation on or before the target date."
+      },
+      "AM_soil_moisture_observation_date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "description": "Observation date associated with AM soil moisture."
+      },
+      "PM_soil_moisture_observation_date": {
+        "type": "date",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "description": "Observation date associated with PM soil moisture."
+      }
+    }
+  },
+  "derived_features": {
+    "Flood": [],
+    "Landslide": [
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ]
+  },
+  "terrain": {
+    "type": "static_district_representation",
+    "source": "M11 frozen target-independent terrain representation",
+    "districts": {
+      "Kodagu": {
+        "terrain_elevation_median": 809.2864,
+        "terrain_slope_median": 8.361528,
+        "terrain_aspect_circular_mean": 183.026977,
+        "terrain_curvature_median": 6.3e-05
+      },
+      "Uttara Kannada": {
+        "terrain_elevation_median": 425.01316,
+        "terrain_slope_median": 5.729603,
+        "terrain_aspect_circular_mean": 188.525166,
+        "terrain_curvature_median": 3.9e-05
+      }
+    },
+    "operational_rule": "Terrain is static and target-independent. It is not requested as a daily real-time observation."
+  },
+  "causality": {
+    "target_date_rule": "Only observations available on or before the target prediction date may be used.",
+    "future_information": "prohibited",
+    "label_usage": "Labels are never prediction inputs. Historical labels may only be used after inference for demonstration or post-hoc comparison.",
+    "smap_alignment": {
+      "rule": "Use the latest SMAP observation on or before the target date.",
+      "maximum_age_days": 7,
+      "interpolation": false,
+      "blind_forward_fill": false,
+      "target_based_alignment": false,
+      "AM_PM_separate": true
+    },
+    "terrain": {
+      "dynamic": false,
+      "target_dependent": false,
+      "event_coordinate_daily_feature": false
+    }
+  },
+  "sequence": {
+    "Flood": {
+      "sequence_length_days": 15,
+      "window": "t-14 ... t",
+      "target_alignment": "target t",
+      "environmental_channels": 15,
+      "post_missingness_channels": 30
+    },
+    "Landslide": {
+      "sequence_length_days": 30,
+      "window": "t-29 ... t",
+      "target_alignment": "target t",
+      "environmental_channels": 15,
+      "post_missingness_channels": 30
+    }
+  },
+  "missing_data": {
+    "general": "Missing observations must be represented explicitly and handled by the locked M11 preprocessing pipeline.",
+    "silent_fabrication": false,
+    "interpolation": false,
+    "target_based_imputation": false,
+    "live_api_missing_response": "Validation failure or explicitly incomplete input; never silently substitute fabricated observations.",
+    "smap": "If no valid causal SMAP observation exists within the 7-day maximum age, the observation remains unavailable."
+  },
+  "validation": {
+    "date": [
+      "valid calendar date",
+      "chronologically interpretable",
+      "no future observation relative to target date"
+    ],
+    "district": "Must belong to the model's locked district list.",
+    "numeric_values": [
+      "finite",
+      "not NaN where contract requires a value",
+      "not infinite"
+    ],
+    "duplicates": "Duplicate observations for the same district/date/variable combination must be detected.",
+    "chronology": "Historical sequences must be ordered chronologically before sequence construction.",
+    "sequence_history": "Prediction cannot proceed until the complete required 15-day Flood or 30-day Landslide causal window has been constructed."
+  },
+  "source_abstraction": {
+    "principle": "The M12 inference engine is source-independent. External providers must be converted into the standardized M12 input contract before inference.",
+    "provider_lock_in": false,
+    "api_keys_in_model": false,
+    "api_keys_in_notebook_contract": false,
+    "api_keys_in_frontend": false,
+    "provider_specific_logic": "Must remain inside source adapters and must not change the M11 model or preprocessing contract.",
+    "priority": [
+      "official/free source",
+      "authoritative alternative",
+      "paid source only if necessary"
+    ]
+  },
+  "non_input_items": [
+    "Flood labels",
+    "Landslide labels",
+    "Historical event confirmation",
+    "Future rainfall",
+    "Future river water level",
+    "Future soil moisture",
+    "Future terrain values",
+    "Ground-truth outcome",
+    "Operational alert threshold"
+  ]
+}

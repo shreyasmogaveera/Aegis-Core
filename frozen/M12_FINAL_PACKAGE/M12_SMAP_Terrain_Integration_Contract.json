@@ -1,0 +1,69 @@
+{
+  "contract_name": "M12_SMAP_Terrain_Integration_Contract",
+  "contract_version": "1.0.0",
+  "created_utc": "2026-09-09T03:03:23.291570+00:00",
+  "status": "LOCKED_FOR_M12_DEVELOPMENT",
+  "purpose": "Supply the remaining Landslide environmental channels using causal SMAP observations and the frozen target-independent M11 terrain representation.",
+  "smap": {
+    "variables": [
+      "AM_soil_moisture",
+      "PM_soil_moisture"
+    ],
+    "selection_rule": "Latest valid observation on or before target date.",
+    "maximum_age_days": 7,
+    "future_observations": false,
+    "interpolation": false,
+    "blind_forward_fill": false,
+    "target_based_alignment": false,
+    "AM_PM_separate": true,
+    "same_day_indicator": "SMAP_same_day",
+    "availability_indicators": [
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available"
+    ]
+  },
+  "terrain": {
+    "source": "M11 frozen terrain representation",
+    "dynamic": false,
+    "target_dependent": false,
+    "daily_api_required": false,
+    "features": [
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ],
+    "districts": [
+      "Kodagu",
+      "Uttara Kannada"
+    ]
+  },
+  "final_landslide_environment": {
+    "feature_count": 15,
+    "feature_order": [
+      "Rainfall_mm",
+      "rainfall_sum_3d_mm",
+      "rainfall_sum_7d_mm",
+      "rainfall_sum_15d_mm",
+      "rainfall_sum_30d_mm",
+      "causal_smap_age_days",
+      "AM_soil_moisture",
+      "PM_soil_moisture",
+      "AM_soil_moisture_available",
+      "PM_soil_moisture_available",
+      "SMAP_same_day",
+      "terrain_elevation_median",
+      "terrain_slope_median",
+      "terrain_aspect_circular_mean",
+      "terrain_curvature_median"
+    ]
+  },
+  "safety": {
+    "future_information": false,
+    "labels_as_inputs": false,
+    "terrain_recalculation": false,
+    "smap_interpolation": false,
+    "preprocessing_refit": false,
+    "model_modification": false
+  }
+}

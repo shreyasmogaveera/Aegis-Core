@@ -1,0 +1,988 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { KARNATAKA_BOUNDS, KARNATAKA_DISTRICTS_GEOJSON } from '../../data/karnatakaDistricts';
+import { KARNATAKA_STATE_BOUNDARY_GEOJSON } from '../../data/karnatakaBoundary';
+import socketService from '../../services/socketService';
+
+// Helper: Point in Polygon check (point = [lat, lng], vs = [[lng, lat], ...])
+const isPointInPolygon = (point, vs) => {
+  if (!point || !vs || vs.length === 0) return false;
+  const x = point[1], y = point[0];
+  let inside = false;
+  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+    const xi = vs[i][0], yi = vs[i][1];
+    const xj = vs[j][0], yj = vs[j][1];
+    const intersect = ((yi > y) !== (yj > y)) &&
+      (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+};
+
+// Custom Shelter Pin Icon (Google Maps Style)
+const createShelterIcon = (status) => {
+  let color = '#16a34a'; // OPEN (Green)
+  if (status === 'NEAR_CAPACITY') {
+    color = '#ea580c'; // Orange
+  } else if (status === 'FULL') {
+    color = '#dc2626'; // Red
+  } else if (status === 'CLOSED') {
+    color = '#4b5563'; // Gray
+  }
+
+  return L.divIcon({
+    className: 'custom-shelter-pin',
+    html: `
+      <div style="
+        background-color: ${color};
+        width: 32px;
+        height: 32px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      ">
+        <span class="material-symbols-outlined" style="
+          transform: rotate(45deg);
+          font-size: 18px;
+          color: #ffffff;
+          font-weight: bold;
+        ">home_work</span>
+      </div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+};
+
+// Custom SOS Emergency Pin Icon (Pulsing Red)
+const createSosIcon = () => {
+  return L.divIcon({
+    className: 'custom-sos-pin',
+    html: `
+      <div style="
+        background-color: #dc2626;
+        width: 34px;
+        height: 34px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse-red 1.5s infinite;
+        cursor: pointer;
+      ">
+        <span class="material-symbols-outlined" style="
+          transform: rotate(45deg);
+          font-size: 20px;
+          color: #ffffff;
+        ">emergency</span>
+      </div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 34],
+    popupAnchor: [0, -34]
+  });
+};
+
+// Custom User GPS Location Dot (Google Maps Style Blue Pulse)
+const createUserLocationIcon = () => {
+  return L.divIcon({
+    className: 'custom-user-location-pin',
+    html: `
+      <div style="position: relative; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+        <div style="
+          position: absolute;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: rgba(37, 99, 235, 0.3);
+          animation: user-pulse 2s infinite ease-out;
+        "></div>
+        <div style="
+          position: relative;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background-color: #2563eb;
+          border: 2.5px solid #ffffff;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        "></div>
+      </div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12]
+  });
+};
+
+// Map Controller Component for programmatic movement and custom controls
+const MapControls = ({ center, zoom, userLocation, onLocateSuccess }) => {
+  const map = useMap();
+
+  const handleZoomIn = () => map.zoomIn();
+  const handleZoomOut = () => map.zoomOut();
+
+  const handleLocateMe = () => {
+    if (userLocation) {
+      map.flyTo(userLocation, 12, { animate: true, duration: 1.5 });
+    } else if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc = [pos.coords.latitude, pos.coords.longitude];
+          if (onLocateSuccess) onLocateSuccess(loc);
+          map.flyTo(loc, 12, { animate: true, duration: 1.5 });
+        },
+        (err) => {
+          console.warn('[AegisMap] Geolocation locate request failed:', err.message);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Zoom Controls (Upper-Right Area) */}
+      <div className="absolute top-4 right-4 z-[1000] flex flex-col bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 overflow-hidden text-gray-700">
+        <button
+          type="button"
+          onClick={handleZoomIn}
+          className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 border-b border-gray-200 transition-colors"
+          title="Zoom In"
+        >
+          <span className="material-symbols-outlined text-xl">add</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleZoomOut}
+          className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
+          title="Zoom Out"
+        >
+          <span className="material-symbols-outlined text-xl">remove</span>
+        </button>
+      </div>
+
+      {/* Floating Locate Me Button (Upper-Right Area) */}
+      <button
+        type="button"
+        onClick={handleLocateMe}
+        className="absolute top-28 right-4 z-[1000] w-10 h-10 bg-white/95 backdrop-blur-md hover:bg-gray-50 text-blue-600 rounded-xl shadow-lg border border-gray-200 flex items-center justify-center transition-colors cursor-pointer"
+        title="Locate Me"
+      >
+        <span className="material-symbols-outlined text-xl">my_location</span>
+      </button>
+    </>
+  );
+};
+
+export const AegisMap = ({ mode = 'dashboard', selectedDistrict = null, onSelectDistrict }) => {
+  // Normalize mode
+  const effectiveMode = mode === 'admin' ? 'dashboard' : mode;
+
+  const [districtPredictions, setDistrictPredictions] = useState({});
+  const [districtTelemetry, setDistrictTelemetry] = useState({});
+  const [shelters, setShelters] = useState([]);
+  const [sosRequests, setSosRequests] = useState([]);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+  const [isOutsideSupportedDistricts, setIsOutsideSupportedDistricts] = useState(false);
+  const [activeDistrict, setActiveDistrict] = useState(selectedDistrict);
+
+  useEffect(() => {
+    setActiveDistrict(selectedDistrict);
+  }, [selectedDistrict]);
+
+  const geoJsonRef = useRef(null);
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+  const token = localStorage.getItem('aegis_token');
+
+  // M11/M12 frontend helpers.
+  // Only frozen-model predictions are treated as authoritative model output.
+  const getPrediction = (district) => districtPredictions[district] || null;
+
+  const isFrozenPrediction = (pred) => (
+    !!pred &&
+    (
+      pred.modelSource === 'AEGIS-CORE_M11_FROZEN' ||
+      pred.source === 'AEGIS-CORE_M11_FROZEN'
+    )
+  );
+
+  const getEventProbability = (pred) => {
+    if (!isFrozenPrediction(pred)) return null;
+
+    const value = pred.riskScore !== undefined
+      ? pred.riskScore
+      : pred.event_probability;
+
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1
+      ? value
+      : null;
+  };
+
+  const getPredictionStatus = (pred) => (
+    isFrozenPrediction(pred)
+      ? (pred.predictionStatus || 'UNKNOWN')
+      : 'NO FROZEN PREDICTION'
+  );
+
+  // Fetch initial environmental telemetry & predictions for the 4 supported districts
+  const fetchDistrictData = () => {
+    const districts = ['Kodagu', 'Uttara Kannada', 'Belagavi', 'Bagalkot'];
+
+    districts.forEach((d) => {
+      // 1. Environmental Telemetry
+      fetch(`${baseUrl}/environmental/latest?district=${encodeURIComponent(d)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((envData) => {
+          if (envData) {
+            setDistrictTelemetry((prev) => ({ ...prev, [d]: envData }));
+          }
+        })
+        .catch((e) => console.warn(`[AegisMap] Telemetry fetch warn for ${d}:`, e.message));
+
+      // 2. Predictions
+      fetch(`${baseUrl}/predictions/latest?district=${encodeURIComponent(d)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((predData) => {
+          if (predData) {
+            setDistrictPredictions((prev) => ({ ...prev, [d]: predData }));
+          }
+        })
+        .catch((e) => console.warn(`[AegisMap] Prediction fetch warn for ${d}:`, e.message));
+    });
+  };
+
+  // Fetch Shelters
+  const fetchShelters = () => {
+    fetch(`${baseUrl}/shelters`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.shelters) {
+          setShelters(data.shelters);
+        }
+      })
+      .catch((e) => console.warn('[AegisMap] Shelters fetch warn:', e.message));
+  };
+
+  // Fetch Active SOS signals (Admin / Dashboard / Risk modes ONLY - User Privacy Enforcement)
+  const fetchSosRequests = () => {
+    if (effectiveMode !== 'dashboard' && effectiveMode !== 'risk') return;
+    fetch(`${baseUrl}/admin/sos`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.sosRequests) {
+          const activeOnly = data.sosRequests.filter(
+            (s) => s.status === 'PENDING' || s.status === 'RESPONDING' || s.status === 'IN_PROGRESS'
+          );
+          setSosRequests(activeOnly);
+        }
+      })
+      .catch((e) => console.warn('[AegisMap] SOS fetch warn:', e.message));
+  };
+
+  const evaluateUserPosition = (pos) => {
+    const loc = [pos.coords.latitude, pos.coords.longitude];
+    setUserLocation(loc);
+    setLocationError(null);
+
+    // Verify if GPS location falls within any of the 4 supported districts
+    let foundInside = false;
+    KARNATAKA_DISTRICTS_GEOJSON.features.forEach((feature) => {
+      const coords = feature.geometry.coordinates[0];
+      if (isPointInPolygon(loc, coords)) {
+        foundInside = true;
+      }
+    });
+
+    setIsOutsideSupportedDistricts(!foundInside);
+  };
+
+  useEffect(() => {
+    fetchDistrictData();
+    fetchShelters();
+    fetchSosRequests();
+
+    // Geolocation API (User mode focus or Locate Me)
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => evaluateUserPosition(pos),
+        (err) => {
+          console.warn('[AegisMap] User location permission denied or unavailable:', err.message);
+          if (effectiveMode === 'user') {
+            setLocationError('Unable to determine your location. Please enable location permission and try again.');
+          }
+        },
+        { enableHighAccuracy: true, timeout: 6000 }
+      );
+    } else if (effectiveMode === 'user') {
+      setLocationError('Unable to determine your location. Please enable location permission and try again.');
+    }
+
+    // Socket.io Subscriptions
+    const unsubPrediction = socketService.onPredictionUpdated((pred) => {
+      if (pred && pred.district) {
+        setDistrictPredictions((prev) => ({ ...prev, [pred.district]: pred }));
+      }
+    });
+
+    const unsubShelter = socketService.onShelterUpdated((updatedShelter) => {
+      if (!updatedShelter) return;
+      setShelters((prev) => {
+        const idx = prev.findIndex((s) => s.id === updatedShelter.id);
+        if (idx >= 0) {
+          const copy = [...prev];
+          copy[idx] = updatedShelter;
+          return copy;
+        }
+        return [...prev, updatedShelter];
+      });
+    });
+
+    let unsubSosCreated, unsubSosUpdated;
+    if (effectiveMode === 'dashboard' || effectiveMode === 'risk') {
+      unsubSosCreated = socketService.onSosCreated((newSos) => {
+        setSosRequests((prev) => [newSos, ...prev]);
+      });
+      unsubSosUpdated = socketService.onSosUpdated((updatedSos) => {
+        setSosRequests((prev) => {
+          if (updatedSos.status === 'RESOLVED' || updatedSos.status === 'CANCELLED') {
+            return prev.filter((s) => s.id !== updatedSos.id);
+          }
+          const idx = prev.findIndex((s) => s.id === updatedSos.id);
+          if (idx >= 0) {
+            const copy = [...prev];
+            copy[idx] = updatedSos;
+            return copy;
+          }
+          return [updatedSos, ...prev];
+        });
+      });
+    }
+
+    return () => {
+      unsubPrediction();
+      unsubShelter();
+      if (unsubSosCreated) unsubSosCreated();
+      if (unsubSosUpdated) unsubSosUpdated();
+    };
+  }, [effectiveMode]);
+
+  // District styling deliberately avoids invented operational thresholds.
+  // The frozen LSTM returns event probability; no risk-level threshold is locked.
+  const getDistrictStyle = (feature) => {
+    const dName = feature.properties.name;
+    const pred = getPrediction(dName);
+    const hasFrozenPrediction = isFrozenPrediction(pred);
+
+    const isSelected = activeDistrict === dName;
+
+    return {
+      fillColor: hasFrozenPrediction ? '#e2e8f0' : '#f8fafc',
+      weight: isSelected ? 2.5 : 1.5,
+      opacity: 0.75,
+      color: isSelected ? '#0f172a' : '#94a3b8',
+      fillOpacity: isSelected
+        ? (effectiveMode === 'shelters' ? 0.35 : 0.50)
+        : (effectiveMode === 'shelters' ? 0.20 : 0.35)
+    };
+  };
+
+  const handleDistrictClick = (districtName) => {
+    setActiveDistrict(districtName);
+    if (onSelectDistrict) {
+      onSelectDistrict(districtName);
+    }
+  };
+
+  const onEachDistrictFeature = (feature, layer) => {
+    const dName = feature.properties.name;
+    layer.on({
+      click: () => handleDistrictClick(dName)
+    });
+  };
+
+  // Helper to format source nicely without inventing data
+  const formatSource = (sourceStr) => {
+    if (!sourceStr) return '—';
+    if (sourceStr === 'AEGIS-CORE_M11_FROZEN') return 'AEGIS-CORE Frozen M11 LSTM';
+    if (sourceStr === 'mock') return 'Legacy mock source';
+    if (sourceStr === 'flask_ml' || sourceStr === 'flask') return 'Legacy Flask source';
+    return sourceStr;
+  };
+
+  return (
+    <div className="w-full h-full relative">
+      {/* User Location Warning Banner (User mode only) */}
+      {effectiveMode === 'user' && locationError && (
+        <div className="absolute top-4 left-4 right-16 z-[1000] bg-amber-600/95 text-white px-4 py-2.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-2 text-xs font-semibold animate-fade-in border border-amber-400/30">
+          <span className="material-symbols-outlined text-lg">warning</span>
+          <span>{locationError}</span>
+        </div>
+      )}
+
+      {/* Outside Supported Districts Notice (User mode only) */}
+      {effectiveMode === 'user' && !locationError && isOutsideSupportedDistricts && (
+        <div className="absolute top-4 left-4 right-16 z-[1000] bg-blue-600/95 text-white px-4 py-2.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-2 text-xs font-semibold animate-fade-in border border-blue-400/30">
+          <span className="material-symbols-outlined text-lg">location_off</span>
+          <span>Your current location is outside the active AegisCore prediction districts.</span>
+        </div>
+      )}
+
+      <MapContainer
+        center={KARNATAKA_BOUNDS.center}
+        zoom={KARNATAKA_BOUNDS.zoom}
+        zoomControl={false}
+        className="w-full h-full"
+      >
+        {/* OpenStreetMap Tile Layer - Clean Light Neutral Terrain */}
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          maxZoom={18}
+          minZoom={5}
+        />
+
+        {/* Custom Controls */}
+        <MapControls
+          center={KARNATAKA_BOUNDS.center}
+          zoom={KARNATAKA_BOUNDS.zoom}
+          userLocation={userLocation}
+          onLocateSuccess={(loc) => {
+            setUserLocation(loc);
+            evaluateUserPosition({ coords: { latitude: loc[0], longitude: loc[1] } });
+          }}
+        />
+
+        {/* Complete Karnataka State Administrative Boundary Outline (Thin, Light, Clean) */}
+        <GeoJSON
+          data={KARNATAKA_STATE_BOUNDARY_GEOJSON}
+          style={{
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            weight: effectiveMode === 'shelters' ? 1.25 : 1.75,
+            color: effectiveMode === 'shelters' ? '#64748b' : '#334155',
+            dashArray: '4, 4',
+            opacity: effectiveMode === 'shelters' ? 0.55 : 0.70
+          }}
+          interactive={false}
+        />
+
+        {/* Subtle State Name Label */}
+        <Marker
+          position={[14.6, 75.8]}
+          icon={L.divIcon({
+            className: 'karnataka-state-label-marker',
+            html: `<div style="
+              font-family: system-ui, -apple-system, sans-serif;
+              font-size: 13px;
+              font-weight: 800;
+              letter-spacing: 0.25em;
+              color: #475569;
+              opacity: 0.55;
+              text-transform: uppercase;
+              white-space: nowrap;
+              pointer-events: none;
+              user-select: none;
+            ">KARNATAKA</div>`,
+            iconSize: [120, 20],
+            iconAnchor: [60, 10]
+          })}
+          interactive={false}
+        />
+
+        {/* 4 Supported Karnataka District Risk GeoJSON Polygons */}
+        <GeoJSON
+          ref={geoJsonRef}
+          data={KARNATAKA_DISTRICTS_GEOJSON}
+          style={getDistrictStyle}
+          onEachFeature={(feature, layer) => {
+            onEachDistrictFeature(feature, layer);
+          }}
+        />
+
+        {/* District Centroid Rounded Pills with Dynamic Risk Color & Bold White Text */}
+        {KARNATAKA_DISTRICTS_GEOJSON.features.map(f => {
+          const dName = f.properties.name;
+          const center = f.properties.center || [14.5, 75.5];
+          const pred = getPrediction(dName);
+          const pillBg = isFrozenPrediction(pred) ? '#475569' : '#94a3b8';
+
+          return (
+            <Marker
+              key={`label-${dName}`}
+              position={center}
+              icon={L.divIcon({
+                className: 'district-pill-marker',
+                html: `<div style="
+                  background-color: ${pillBg};
+                  color: #ffffff;
+                  font-family: system-ui, -apple-system, sans-serif;
+                  font-size: 11px;
+                  font-weight: 800;
+                  letter-spacing: 0.03em;
+                  padding: 4px 10px;
+                  border-radius: 9999px;
+                  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+                  border: 1.5px solid rgba(255, 255, 255, 0.9);
+                  white-space: nowrap;
+                  text-align: center;
+                  pointer-events: none;
+                  user-select: none;
+                ">${dName}</div>`,
+                iconSize: [120, 24],
+                iconAnchor: [60, 12]
+              })}
+              interactive={false}
+            />
+          );
+        })}
+
+        {/* Shelter Pin Markers */}
+        {shelters.map((shelter) => {
+          if (!shelter.location || !shelter.location.coordinates) return null;
+          const [lng, lat] = shelter.location.coordinates;
+          const availableBeds = Math.max(0, (shelter.capacity || 0) - (shelter.occupied || 0));
+
+          return (
+            <Marker key={shelter.id} position={[lat, lng]} icon={createShelterIcon(shelter.status)}>
+              <Popup className="clean-light-popup">
+                <div className="p-1 space-y-2 min-w-[210px] text-slate-800 font-sans">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                    <h4 className="font-bold text-slate-900 text-sm">{shelter.name}</h4>
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        shelter.status === 'OPEN'
+                          ? 'bg-green-100 text-green-800'
+                          : shelter.status === 'NEAR_CAPACITY'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {shelter.status}
+                    </span>
+                  </div>
+                  <div className="text-xs space-y-1.5 font-medium text-slate-600">
+                    <p><span className="text-slate-900 font-semibold">District:</span> {shelter.district}</p>
+                    <p><span className="text-slate-900 font-semibold">Capacity:</span> {shelter.occupied} / {shelter.capacity} occupied</p>
+                    <p><span className="text-emerald-600 font-bold">Beds Available:</span> {availableBeds}</p>
+                    {shelter.contactPhone && <p><span className="text-slate-900 font-semibold">Contact:</span> {shelter.contactPhone}</p>}
+                    {effectiveMode === 'shelters' && (
+                      <div className="pt-1 border-t border-slate-200 text-[11px] text-slate-500">
+                        <span className="font-semibold text-slate-700">Facilities:</span> Food, Water, Medical Care
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {/* Active SOS Emergency Markers (ADMIN & RISK MODES ONLY - PRIVACY ENFORCED) */}
+        {(effectiveMode === 'dashboard' || effectiveMode === 'risk') &&
+          sosRequests.map((sos) => {
+            if (!sos.location || !sos.location.coordinates) return null;
+            const [lng, lat] = sos.location.coordinates;
+
+            return (
+              <Marker key={sos.id} position={[lat, lng]} icon={createSosIcon()}>
+                <Popup className="clean-light-popup">
+                  <div className="p-1 space-y-2 min-w-[230px] text-slate-800 font-sans">
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                      <span className="font-mono font-bold text-red-600 text-xs">
+                        SOS #{sos.id ? sos.id.slice(-4).toUpperCase() : 'CALL'}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold">
+                        {sos.status}
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-1 text-slate-600">
+                      <p><span className="text-slate-900 font-semibold">Emergency Type:</span> {sos.emergencyType || sos.type}</p>
+                      <p><span className="text-slate-900 font-semibold">District:</span> {sos.district}</p>
+                      <p><span className="text-slate-900 font-semibold">Requester:</span> {sos.name || 'Citizen'} ({sos.phone || 'N/A'})</p>
+                      <p><span className="text-slate-900 font-semibold">Latitude:</span> {lat.toFixed(5)}</p>
+                      <p><span className="text-slate-900 font-semibold">Longitude:</span> {lng.toFixed(5)}</p>
+                      {sos.details && <p className="text-[11px] text-slate-700 italic mt-1 bg-slate-50 p-1.5 rounded border border-slate-200">"{sos.details}"</p>}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+        {/* User GPS Location Marker */}
+        {userLocation && (
+          <Marker position={userLocation} icon={createUserLocationIcon()}>
+            <Popup className="clean-light-popup">
+              <div className="text-xs font-semibold text-blue-700 p-1">
+                📍 Your Current Location
+              </div>
+            </Popup>
+          </Marker>
+        )}
+      </MapContainer>
+
+      {/* Frozen Model Scope Legend */}
+      <div className="absolute top-42 right-4 z-[1000] bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-gray-200 shadow-xl max-w-[200px] text-slate-800 font-sans space-y-2 animate-fade-in pointer-events-auto">
+        <div className="flex items-center gap-1.5 border-b border-gray-200 pb-1.5">
+          <span className="material-symbols-outlined text-blue-600 text-base">verified</span>
+          <h4 className="font-bold text-slate-900 text-[11px] tracking-wide uppercase">
+            Model Scope
+          </h4>
+        </div>
+        <div className="space-y-1 text-[11px] font-semibold">
+          <div className="flex items-center gap-1.5 text-slate-800">
+            <span className="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span>
+            Frozen M11 prediction
+          </div>
+          <div className="text-[10px] text-gray-500 font-normal leading-relaxed">
+            Event probability is shown directly. No operational threshold is applied.
+          </div>
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          MODE 1: ADMIN DASHBOARD MAP OVERLAY (Concise "Situation at a glance")
+         ════════════════════════════════════════════════════════════════════════ */}
+      {effectiveMode === 'dashboard' && activeDistrict && (
+        <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-gray-200 shadow-xl max-w-xs w-full text-slate-800 font-sans space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2 uppercase tracking-wide">
+              <span className="material-symbols-outlined text-blue-600 text-lg">domain</span>
+              {activeDistrict}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setActiveDistrict(null)}
+              className="text-gray-400 hover:text-gray-700 text-xs font-bold w-5 h-5 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="space-y-1.5 text-xs font-semibold">
+            {(() => {
+              const pred = getPrediction(activeDistrict);
+              const probability = getEventProbability(pred);
+
+              return (
+                <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100 space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Model Output</span>
+                    <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-slate-100 text-slate-700">
+                      {getPredictionStatus(pred)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Event Probability</span>
+                    <span className="font-mono text-slate-900 font-bold text-[11px]">
+                      {probability !== null ? probability.toFixed(4) : '—'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {districtTelemetry[activeDistrict] && (
+            <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100 font-mono">
+              <div className="flex justify-between">
+                <span>Rainfall</span>
+                <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].rainfall_mm} mm</span>
+              </div>
+              <div className="flex justify-between">
+                <span>River Level</span>
+                <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].river_level_m} m</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Soil Moisture</span>
+                <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].soil_moisture_pct}%</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          MODE 2: ADMIN RISK & DISASTER MAP DETAILED INSPECTOR OVERLAY
+         ════════════════════════════════════════════════════════════════════════ */}
+      {effectiveMode === 'risk' && activeDistrict && (
+        <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-gray-200 shadow-2xl max-w-sm w-full text-slate-800 font-sans space-y-4 animate-fade-in max-h-[calc(100vh-140px)] overflow-y-auto custom-scrollbar">
+          <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+            <div>
+              <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2 uppercase tracking-wide">
+                <span className="material-symbols-outlined text-red-600 text-xl">travel_explore</span>
+                {activeDistrict}
+              </h3>
+              <span className="text-[10px] text-gray-500 font-medium">DISASTER INTELLIGENCE INSPECTOR</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveDistrict(null)}
+              className="text-gray-400 hover:text-gray-700 text-sm font-bold w-6 h-6 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {(() => {
+            const pred = getPrediction(activeDistrict);
+            const probability = getEventProbability(pred);
+            const predictionType = String(
+              pred?.predictionType || pred?.prediction_type || ''
+            ).toUpperCase();
+
+            return (
+              <div className="space-y-3">
+                {/* FLOOD MODEL OUTPUT */}
+                <div className="bg-red-50/60 p-3.5 rounded-xl border border-red-100 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-red-900 text-xs tracking-wider uppercase flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base text-red-600">
+                        water_drop
+                      </span>
+                      Flood Model
+                    </span>
+
+                    <span className="px-2.5 py-0.5 rounded font-bold text-xs bg-red-100 text-red-700">
+                      {predictionType === 'FLOOD'
+                        ? getPredictionStatus(pred)
+                        : 'NO FLOOD PREDICTION'}
+                    </span>
+                  </div>
+
+                  <div className="bg-white p-2 rounded border border-red-100">
+                    <span className="text-gray-500 text-[10px] block">
+                      Event Probability
+                    </span>
+                    <span className="font-bold text-slate-900 text-sm font-mono">
+                      {predictionType === 'FLOOD' && probability !== null
+                        ? probability.toFixed(4)
+                        : '—'}
+                    </span>
+                  </div>
+
+                  <div className="text-[10px] text-gray-500 font-mono">
+                    Source: {predictionType === 'FLOOD' ? formatSource(pred?.modelSource || pred?.source) : '—'}
+                  </div>
+                </div>
+
+                {/* LANDSLIDE MODEL OUTPUT */}
+                <div className="bg-amber-50/60 p-3.5 rounded-xl border border-amber-100 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-amber-900 text-xs tracking-wider uppercase flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base text-amber-600">
+                        landslide
+                      </span>
+                      Landslide Model
+                    </span>
+
+                    {activeDistrict === 'Belagavi' || activeDistrict === 'Bagalkot' ? (
+                      <span className="font-bold text-gray-600 bg-gray-200 px-2.5 py-0.5 rounded text-[10px]">
+                        NOT AVAILABLE
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-0.5 rounded font-bold text-xs bg-amber-100 text-amber-700">
+                        {predictionType === 'LANDSLIDE'
+                          ? getPredictionStatus(pred)
+                          : 'NO LANDSLIDE PREDICTION'}
+                      </span>
+                    )}
+                  </div>
+
+                  {activeDistrict === 'Belagavi' || activeDistrict === 'Bagalkot' ? (
+                    <p className="text-[11px] text-gray-500 italic bg-white/80 p-2 rounded border border-gray-200">
+                      Landslide prediction is not available for {activeDistrict}.
+                    </p>
+                  ) : (
+                    <div className="bg-white p-2 rounded border border-amber-100">
+                      <span className="text-gray-500 text-[10px] block">
+                        Event Probability
+                      </span>
+                      <span className="font-bold text-slate-900 text-sm font-mono">
+                        {predictionType === 'LANDSLIDE' && probability !== null
+                          ? probability.toFixed(4)
+                          : '—'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* TELEMETRY */}
+          {districtTelemetry[activeDistrict] && (
+            <div className="space-y-1.5 text-xs text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-200">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                ENVIRONMENTAL TELEMETRY
+              </span>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 font-mono">
+                <div className="flex justify-between">
+                  <span>Rainfall:</span>
+                  <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].rainfall_mm} mm</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>River Level:</span>
+                  <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].river_level_m} m</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Soil Moisture:</span>
+                  <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].soil_moisture_pct}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Temperature:</span>
+                  <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].temperature_c ?? '—'}°C</span>
+                </div>
+                <div className="flex justify-between col-span-2">
+                  <span>Humidity:</span>
+                  <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].humidity_pct ?? '—'}%</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* METADATA: FORECAST WINDOW & SOURCE */}
+          <div className="space-y-1 text-xs text-gray-600 bg-slate-50 p-3 rounded-xl border border-slate-200 font-mono">
+            <div className="flex justify-between">
+              <span className="text-gray-500">Forecast Window:</span>
+              <span className="text-slate-900 font-bold">
+                {districtPredictions[activeDistrict]?.timeWindowHours ?? districtPredictions[activeDistrict]?.time_window_hours ?? '—'}{districtPredictions[activeDistrict]?.timeWindowHours !== undefined || districtPredictions[activeDistrict]?.time_window_hours !== undefined ? ' hours' : ''}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-500">Prediction Source:</span>
+              <span className="text-blue-700 font-bold">
+                {formatSource(districtPredictions[activeDistrict]?.source)}
+              </span>
+            </div>
+            {districtPredictions[activeDistrict]?.createdAt && (
+              <div className="flex justify-between text-[10px] text-gray-500 pt-1 border-t border-gray-200 mt-1">
+                <span>Updated:</span>
+                <span>{new Date(districtPredictions[activeDistrict].createdAt).toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+
+          {/* RECOMMENDATIONS */}
+          <div className="space-y-2 pt-1 border-t border-gray-200">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+              RECOMMENDED ACTIONS
+            </span>
+            <ul className="text-xs text-slate-700 space-y-1 list-disc pl-4 font-medium">
+              {districtPredictions[activeDistrict]?.recommendations && districtPredictions[activeDistrict].recommendations.length > 0 ? (
+                districtPredictions[activeDistrict].recommendations.map((rec, idx) => <li key={idx}>{rec}</li>)
+              ) : (
+                <li className="list-none pl-0 text-gray-500 italic">
+                  No model-generated recommendations are available.
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          MODE 4: USER RISK MAP SIMPLIFIED SAFETY CARD
+         ════════════════════════════════════════════════════════════════════════ */}
+      {effectiveMode === 'user' && activeDistrict && (
+        <div className="absolute top-16 left-4 z-[1000] bg-white/95 backdrop-blur-md p-5 rounded-2xl border border-gray-200 shadow-xl max-w-xs w-full text-slate-800 font-sans space-y-3 animate-fade-in">
+          <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+            <div>
+              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">YOUR AREA</span>
+              <h3 className="font-bold text-slate-900 text-base uppercase tracking-wide">
+                {activeDistrict}
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveDistrict(null)}
+              className="text-gray-400 hover:text-gray-700 text-xs font-bold w-5 h-5 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Frozen Model Output */}
+          {(() => {
+            const pred = getPrediction(activeDistrict);
+            const probability = getEventProbability(pred);
+            const predictionType = String(
+              pred?.predictionType || pred?.prediction_type || ''
+            ).toUpperCase();
+
+            return (
+              <div className="space-y-2 text-xs font-semibold">
+                <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+                  <span className="text-gray-600">Prediction Status</span>
+                  <span className="px-2.5 py-0.5 rounded font-bold text-xs bg-slate-100 text-slate-700">
+                    {getPredictionStatus(pred)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100">
+                  <span className="text-gray-600">Event Probability</span>
+                  <span className="font-mono text-slate-900 font-bold">
+                    {probability !== null ? probability.toFixed(4) : '—'}
+                  </span>
+                </div>
+
+                <div className="text-[10px] text-gray-500 font-mono">
+                  Model: {isFrozenPrediction(pred) ? 'AEGIS-CORE M11 Frozen' : '—'}
+                  {predictionType ? ` · ${predictionType}` : ''}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Environmental Summary */}
+          {districtTelemetry[activeDistrict] && (
+            <div className="space-y-1 text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100 font-mono">
+              <div className="flex justify-between">
+                <span>Rainfall</span>
+                <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].rainfall_mm} mm</span>
+              </div>
+              <div className="flex justify-between">
+                <span>River Level</span>
+                <span className="text-slate-900 font-bold">{districtTelemetry[activeDistrict].river_level_m} m</span>
+              </div>
+            </div>
+          )}
+
+          {/* Nearby Shelters Count */}
+          <div className="flex justify-between items-center bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-900">
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-emerald-600">home_work</span>
+              Nearby Safe Shelters
+            </span>
+            <span className="bg-emerald-600 text-white font-mono font-bold px-2 py-0.5 rounded-full text-xs">
+              {shelters.filter((s) => s.district === activeDistrict && (s.status === 'OPEN' || s.status === 'NEAR_CAPACITY')).length}
+            </span>
+          </div>
+
+          {/* Recommended Action */}
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 space-y-1 text-xs text-blue-950 font-medium">
+            <span className="font-bold text-blue-800 text-[10px] uppercase tracking-wider block">RECOMMENDED ACTION</span>
+            <p>Monitor official alerts and prepare for possible evacuation if conditions escalate.</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

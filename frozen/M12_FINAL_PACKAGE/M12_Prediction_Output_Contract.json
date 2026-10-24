@@ -1,0 +1,121 @@
+{
+  "contract_name": "M12_Prediction_Output_Contract",
+  "contract_version": "1.0",
+  "status": "FROZEN_FOR_M12",
+  "purpose": "Canonical output schema for M12 historical replay and live prediction modes.",
+  "prediction_semantics": {
+    "event_probability": "Frozen M11 model forward-pass probability in the interval [0,1].",
+    "binary_operational_decision": "Not locked by M12 Cell 10. A probability must not be converted to a binary operational decision without an explicit separately approved threshold."
+  },
+  "fields": {
+    "required": [
+      "prediction_id",
+      "mode",
+      "model",
+      "hazard",
+      "district",
+      "target_date",
+      "event_probability",
+      "prediction_status",
+      "history_status",
+      "data_quality_status",
+      "smap_status",
+      "smap_age_days",
+      "model_sha256",
+      "preprocessing_sha256",
+      "sequence_length",
+      "generated_utc",
+      "operational_decision"
+    ]
+  },
+  "modes": [
+    "historical_replay",
+    "live"
+  ],
+  "hazards": [
+    "flood",
+    "landslide"
+  ],
+  "districts": {
+    "flood": [
+      "Kodagu",
+      "Uttara Kannada",
+      "Belagavi",
+      "Bagalkot"
+    ],
+    "landslide": [
+      "Kodagu",
+      "Uttara Kannada"
+    ]
+  },
+  "models": {
+    "flood": {
+      "name": "Flood_T06_FINAL",
+      "sha256": "7e30a0f69b511bed8c3ce2bb8b8432e960822f74427df66eb09ebde1df3f8910",
+      "sequence_length": 15,
+      "channels": 30
+    },
+    "landslide": {
+      "name": "Landslide_T01_FINAL",
+      "sha256": "6eedfb70c1e51d2fb617b22b7ef7a7d127f47f9a9d807f9e7bf2b71e0fd3463f",
+      "sequence_length": 30,
+      "channels": 30
+    }
+  },
+  "preprocessing": {
+    "sha256": "a52634083d70a3a6a3a28341072f59cc2e48fcb465ec9f373fbd89b6ad201cfb",
+    "channels": 30,
+    "training_refit": false
+  },
+  "quality_states": {
+    "prediction_status": [
+      "data_quality_failure",
+      "insufficient_history",
+      "model_error",
+      "prediction_ready"
+    ],
+    "history_status": [
+      "complete",
+      "incomplete"
+    ],
+    "data_quality_status": [
+      "fail",
+      "pass",
+      "warning"
+    ],
+    "smap_status": [
+      "causal_lag",
+      "not_applicable",
+      "same_day",
+      "unavailable"
+    ]
+  },
+  "smap": {
+    "maximum_causal_age_days": 7,
+    "future_observation_allowed": false,
+    "interpolation_allowed": false,
+    "blind_forward_fill_allowed": false
+  },
+  "threshold_policy": {
+    "operational_threshold_locked": false,
+    "threshold_optimization_in_cell_10": false,
+    "probability_to_decision_conversion": false
+  },
+  "provenance": {
+    "cell8_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Exact_M11_Preprocessing_Contract.json",
+    "cell8_contract_sha256": "ab8f55e7692b594e2e1bd0a86a6a2eb3d4159f94adf9b208420892002f6056d1",
+    "cell9_contract": "E:\\AEGIS-CORE\\OUTPUTS\\M12_PREDICTION_PIPELINE\\M12_Frozen_Model_Inference_Contract.json",
+    "cell9_contract_sha256": "2b11607dd87aab4554432d225d1528ce53b243d38217e3ede94743e557ab3972"
+  },
+  "self_tests": {
+    "upstream_contracts": "PASS",
+    "model_identity": "PASS",
+    "flood_output": "PASS",
+    "landslide_output": "PASS",
+    "invalid_probability_rejection": "PASS",
+    "invalid_district_rejection": "PASS",
+    "model_hazard_consistency": "PASS",
+    "threshold_non_lock": "PASS",
+    "probability_semantics": "PASS"
+  }
+}
